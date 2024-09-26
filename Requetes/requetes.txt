@@ -1,0 +1,90 @@
+# Pokeshop API Documentation
+
+Cette API permet de gérer les produits, les commandes, ainsi que le suivi des utilisateurs dans l'application Pokeshop.
+
+## Endpoints
+
+### Gestion des produits
+
+- **Liste des produits**  
+  Récupère la liste de tous les produits disponibles.
+
+  ```
+  GET http://localhost:8000/api/pokedex/
+
+Détails d'un produit
+Récupère les informations d'un produit spécifique.
+
+GET http://localhost:8000/api/pokedex/{id}/
+
+Ajouter un produit
+Ajoute un nouveau produit dans le catalogue.
+
+POST http://localhost:8000/api/pokedex/
+
+Mettre à jour un produit
+Modifie les informations d'un produit existant.
+
+PATCH http://localhost:8000/api/pokedex/{id}/
+
+Supprimer un produit
+Supprime un produit du catalogue.
+
+DELETE http://localhost:8000/api/pokedex/{id}/
+
+Gestion des commandes
+Liste des commandes
+Récupère la liste de toutes les commandes.
+
+
+
+GET http://localhost:8000/api/commandes/
+Détails d'une commande
+Récupère les détails d'une commande spécifique.
+
+
+
+GET http://localhost:8000/api/commandes/{id}/
+Créer une nouvelle commande
+Crée une nouvelle commande pour un utilisateur lors de la validation de son panier.
+
+
+
+POST http://localhost:8000/api/commandes/
+Body :
+json
+
+{
+  "utilisateur_id": 1,
+  "adresse_livraison": "123 Rue Exemple",
+  "ville": "Paris",
+  "code_postal": 75000,
+  "livraison": "standard",
+  "total": 120.50,
+  "numero_commande": "CMD123456",
+  "statut": "en traitement"
+}
+Mettre à jour le statut d'une commande
+Met à jour le statut d'une commande existante.
+
+
+
+PATCH http://localhost:8000/api/commandes/{id}/
+Body :
+json
+
+{
+  "statut": "expediée"
+}
+Annuler une commande
+Annule une commande en cours.
+
+
+
+PATCH http://localhost:8000/api/commandes/{id}/
+Body :
+json
+
+{
+  "statut": "annulée"
+}

@@ -11,8 +11,18 @@ class Utilisateur(models.Model):
 
     def __str__(self):
         return f"{self.prenom} {self.nom}"
+    
+    class Meta:
+        db_table = 'utilisateur'  # Correspond à ta table existante
+        managed = False
 
 class Commande(models.Model):
+    STATUT_CHOICES = [
+        ('EN_TRAITEMENT', 'En traitement'),
+        ('EXPEDIEE', 'Expédiée'),
+        ('LIVREE', 'Livrée'),
+        ('ANNULEE', 'Annulée'),
+    ]
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     adresse_livraison = models.CharField(max_length=150)  # Réduction à 150 caractères
     ville = models.CharField(max_length=150)  # Réduction à 150 caractères
@@ -21,6 +31,39 @@ class Commande(models.Model):
     total = models.DecimalField(max_digits=7, decimal_places=2)
     numero_commande = models.CharField(max_length=100, db_index=False)  # Désactiver l'indexation automatique
     date_creation = models.DateTimeField(auto_now_add=True)
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='EN_TRAITEMENT')
 
     def __str__(self):
         return f"Commande {self.numero_commande} de {self.utilisateur.prenom}"
+
+    class Meta:
+        db_table = 'commandes'  # Correspond à ta table existante
+        managed = False
+    
+    
+
+class Pokedex(models.Model):
+    id = models.IntegerField(primary_key=True)
+    nom = models.CharField(max_length=100)
+    type_1 = models.CharField(max_length=100)
+    type_2 = models.CharField(max_length=100, null=True, blank=True)
+    generation = models.IntegerField()
+    legendaire = models.BooleanField(default=False)
+    prix = models.DecimalField(max_digits=5, decimal_places=2)
+    discount = models.IntegerField()
+    image = models.CharField(max_length=150)
+    quantite = models.IntegerField(default=0)
+    description = models.CharField(max_length=250)
+
+    class Meta:
+        db_table = 'pokedex'  # Correspond à la table existante 'pokedex'
+        managed = False
+
+    def save(self, *args, **kwargs):
+        # Vérifie si un Pokémon avec le même ID existe déjà
+        if Pokedex.objects.filter(id=self.id).exists():
+            raise ValidationError(f"Un Pokémon avec l'ID {self.id} existe déjà.")
+        super(Pokedex, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.nom
