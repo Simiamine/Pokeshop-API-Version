@@ -1,0 +1,32 @@
+.bg-light {
+    background-color: #e3e6f3 !important; 
+}
+
+
+.bg-light .nav-link {
+    background-color: #e3e6f3 !important;
+}
+
+.bg-light.border {
+    border-color: #e3e6f3; 
+}
+
+i,a{
+    color: black;
+}
+
+
+aside.flex-grow-1 {
+    flex: 1;
+    width: 220px; 
+}
+
+main.flex-grow-4 {
+    flex: 4;
+    overflow-auto: hidden;
+}
+
+main {
+    margin-left: 20px; 
+    margin-right: 20px; 
+}

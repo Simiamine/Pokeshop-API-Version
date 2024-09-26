@@ -1,0 +1,187 @@
+.button-ajouter {
+    display: inline-block; 
+    margin-top: 15px;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px; 
+    transition: background-color 0.3s ease; 
+}
+
+.button-ajouter:hover {
+    background-color: #45a049; 
+}
+ 
+#pokemonName {
+    position: absolute; 
+    top: 0; 
+    left: 50%; 
+    transform: translateX(-50%); /* Centre le nom horizontalement par rapport à sa propre largeur */
+    font-size: 60px; 
+    margin-top: 20px; 
+}
+
+
+.popup-content img {
+    flex: 0.5; /* Permet à l'image de prendre tout l'espace disponible */
+}
+
+    /* Styles pour la pop-up */
+.popup {
+    position: fixed;
+    width: 100%;
+    background-color: rgba(0,0,0.5,0.8); /* Fond semi-transparent */
+    display: none; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 1000; /* S'assure que la pop-up soit au-dessus des autres éléments */
+   
+}
+
+.popup-content {
+    margin: auto;
+    background: white;
+    width: 70%; 
+    padding: 6%; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* ajoute une ombre pour un effet de profondeur */
+    position: relative; 
+    margin-top: 13%;
+    border-radius: 9px;
+}
+
+.popup-flex-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aligner les éléments au début du conteneur */
+}
+
+.popup-text-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: -20px; /* Décaler vers le haut, ajustez selon le besoin */
+}
+
+#pokemonDescription {
+    font-size: 20px; 
+    text-align: center; 
+    max-width: 120%; /* Limite la largeur du texte pour éviter qu'il ne soit trop étendu */
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    color: #000;
+    cursor: pointer;
+}
+
+    /*style pour le prix */ 
+.original-price {
+  text-decoration: line-through; /* Barre le prix original */
+  color: #9e9e9e; 
+}
+
+.discounted-price {
+  color: red; /* Met le nouveau prix en rouge */
+  font-weight: bold; 
+}
+
+     /*style pour la barre de recherche */ 
+.search-wrap {
+    display: flex;
+    margin-top: 2.5%;
+    width: 50%;
+    padding: 5px;
+    background-color: #757575; 
+    margin-left: 25%;
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.search-btn {
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+     /*style pour le contenue du pokemon */ 
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly; 
+  align-items: center; /* Aligner les cartes sur le haut */
+  margin-right: 10%;
+  margin-left: 9%;
+}
+
+.card {
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+  border-radius: 9px;
+  overflow: hidden;
+  margin: 2rem;
+  flex-basis: 20%;
+  max-width: 20%; /* Empêche les cartes de devenir plus grandes que 20% de la largeur du conteneur */
+  cursor: pointer;
+
+}
+
+.card:hover {
+  box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+.card-img-top-container {
+  padding: 2.6rem;
+  background-color: white; 
+}
+
+.card-img-top {
+  width: 100%;
+  object-fit: contain;
+}
+
+.card-body {
+  padding: 3rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+}
+
+.card-text {
+  font-size: 1rem;
+  color: #757575;
+}
+
+.pokemon-type {
+  display: block;
+}
+
+
+@media (max-width: 991px) {
+  .card {
+    flex-basis: 48%; /* Sur les tablettes, deux cartes par ligne */
+    max-width: 48%;
+  }
+}
+
+@media (max-width: 767px) {
+  .card {
+    flex-basis: 100%; /* Sur les mobiles, une carte par ligne */
+    max-width: 100%;
+  }
+}

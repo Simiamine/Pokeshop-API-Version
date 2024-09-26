@@ -1,0 +1,513 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat|Quicksand');
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'quicksand',Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
+}
+
+
+header .logo {
+    color: #ec5565;
+    font-size: 25px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+}
+header .logo span {
+    color: #424a55;
+}
+
+/*Scrollbar CSS*/
+
+::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+}
+::-webkit-scrollbar-thumb{
+    background-color: #ea1f33;
+}
+
+#boutonAchete{
+    margin-left: 100px;
+    background: #ee1515;
+    border: 1px solid #ee1515;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
+    box-sizing: border-box;
+    color: white;
+    cursor: pointer;
+    display: inline-block;
+    font-family: nunito,roboto,proxima-nova,"proxima nova",sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 16px;
+    min-height: 40px;
+    outline: 0;
+    padding: 12px 14px;
+    text-align: center;
+    text-rendering: geometricprecision;
+    text-transform: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: middle;
+}
+    
+#boutonAchete:hover,
+#boutonAchete:active {
+    background-color: initial;
+    background-position: 0 0;
+    color: #FF4742;
+}
+    
+
+
+/* header start*/
+#header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 80px;
+    background: #e3e6f3;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+    z-index: 999;
+    position: sticky;
+    top: 0;
+    left: 0;
+
+}
+
+#navbar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#navbar li {
+     list-style:none;
+     padding: 0 80px;
+     position: relative;
+}
+
+#navbar li a{
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: #424a55;
+    transition: 0.3s ease;
+}
+
+#offreTemp{
+    background-color: #ee1515;
+    color: white;
+    font-size: 2rem;
+    text-align: center;
+    padding-top : 10px;
+    padding-bottom: 10px;
+    margin-bottom : 50px;
+}
+#code{
+    background-color: #ed1e1e;
+    color: white;   
+    font-weight: 800;
+}
+
+/* differenciation en fonction de l'id, couleur qui change*/
+
+/* menu*/
+#menu:hover, 
+#menu.active
+{
+    color: #ec5565 ;
+}
+
+#menu:hover::after,
+#menu.active::after{
+    content: "" ;
+    width: 21%;
+    height: 3.5px;
+    background: #ec5565;
+    position: absolute;
+    border-radius: 60px;
+    bottom: -4px;
+    left: 80px;
+}
+
+/* catalogue*/
+#catalogue:hover, 
+#catalogue.active
+{
+    color: #ec5565 ;
+}
+#catalogue:hover::after,
+#catalogue.active::after{
+    content: "" ;
+    width: 33%;
+    height: 3.5px;
+    border-radius: 60px;
+    background: #ec5565;
+    position: absolute;
+    bottom: -4px;
+    left: 80px;
+}
+
+/* avantage */
+#avantage:hover, 
+#avantage.active
+{
+    color: #ec5565 ;
+}
+#avantage:hover::after,
+#avantage.active::after{
+    content: "" ;
+    width: 34%;
+    height: 3.5px;
+    border-radius: 60px;
+    background: #ec5565;
+    position: absolute;
+    bottom: -4px;
+    left: 78px;
+}
+
+/* contact */
+#contact:hover, 
+#contact.active
+{
+    color: #ec5565 ;
+}
+
+#contact:hover::after,
+#contact.active::after{
+    content: "" ;
+    width: 27.5%;
+    height: 3.5px;
+    border-radius: 60px;
+    background: #ec5565;
+    position: absolute;
+    bottom: -4px;
+    left: 80px;
+}
+
+/* connexion */
+#connexion:hover, 
+#connexion.active
+{
+    color: #ec5565 ;
+}
+#connexion:hover::after,
+#connexion.active::after{
+    content: "" ;
+    width: 33%;
+    height: 3.5px;
+    border-radius: 60px;
+    background: #ec5565;
+    position: absolute;
+    bottom: -4px;
+    left: 80px;
+}
+
+/* panier */
+#panier:hover, 
+#panier.active
+{
+    color: #ec5565 ;
+}
+
+/* ancien
+#navbar li a#panier:hover::after,
+#navbar li a#panier.active::after{
+*/
+#panier:hover::after,
+#panier.active::after{
+    content: "" ;
+    width: 11%;
+    height: 3.5px;
+    background: #ec5565;
+    position: absolute;
+    bottom: -8px;
+    left: 80px;
+}
+
+/* plante */
+#navbar li a#plante:hover, 
+#navbar li a#plante.active{
+    color: #62bc5b ;
+}
+
+#navbar li a#plante:hover::after,
+#navbar li a#plante.active::after{
+    content: "" ;
+    width: 24%;
+    height: 3.5px;
+    background: #62bc5b;
+    position: absolute;
+    bottom: -4px;
+    left: 80px;
+}
+
+/* feu */
+#navbar li a#feu:hover, 
+#navbar li a#feu.active{
+    color: #ff9c54 ;
+}
+
+#navbar li a#feu:hover::after,
+#navbar li a#feu.active::after{
+    content: "" ;
+    width: 15%;
+    height: 3.5px;
+    background: #ff9c54;
+    position: absolute;
+    bottom: -4px;
+    left: 80px;
+}
+
+/* eau */
+#navbar li a#eau:hover, 
+#navbar li a#eau.active{
+    color: #5190d7 ;
+}
+
+#navbar li a#eau:hover::after,
+#navbar li a#eau.active::after{
+    content: "" ;
+    width: 16%;
+    height: 3.5px;
+    background: #5190d7;
+    position: absolute;
+    bottom: -4px;
+    left: 80px;
+}
+
+
+
+/* Home page */
+#hero {
+    background-image: url("../img/pikachu.png");
+    height: 100vh;
+    width: 100%;
+    max-height: 20%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding: 0 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    background-position: right top;
+    background-size: contain;
+    background-position: calc(100% - 50px) center
+}
+
+
+#hero h2 {
+    font-size: 70px;
+    color: #171512;
+}
+
+#hero h1 {
+    font-size: 85px;
+    color: #bf362a;
+}
+
+#hero .right {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#hero .right img {
+    width: 100%;
+}
+
+#hero .left {
+    width: 40%;
+}
+#hero .left h1 {
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+#hero .left h1 span {
+    color: #ea1f33;
+}
+#hero .left p {
+    margin-bottom: 30px;
+    color: #999;
+    font-size: 13px;
+}
+
+#hero .left button {
+    background-color: #af8a8d;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #fff;
+    transition: 0.5s;
+}
+#hero .left button:hover {
+    background-color: #000;
+}
+
+
+
+@media screen and (max-width: 768px) {
+    #navbar li {
+        padding: 0 20px; /* Réduire l'espacement pour les écrans plus petits */
+    }
+
+    #header {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    /* Ajuster la taille de la police pour les petits écrans */
+    #navbar li a {
+        font-size: 14px;
+    }
+}
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+
+#header {
+    display: flex;
+    flex-wrap: wrap; /* Permet aux éléments de passer à la ligne sur les petits écrans */
+}
+
+body {
+    font-size: 16px;
+    padding-bottom: 0px !important;
+}
+
+h1 {
+    font-size: 2.5rem; /* 40px si la taille de la police du body est de 16px */
+}
+
+
+/* Bouton deconnexion */
+#deconnexion{
+    border-radius: 13px;
+    border:none;
+    font-weight: bold;
+    font-size:1.2em;
+    padding:0.5em 0.8em 0.5em 0.8em!important;
+    transition:0.5s;
+    border:1px solid #ebebeb;
+}
+
+#deconnexion{
+    background:#ee1515;
+    color:#fff !important;
+}
+
+#deconnexion:hover{
+    background:#ff7373;
+}
+
+/* LE FOOTER DE ZARA */
+.footer {
+background-color: #1b1c1e;
+color: #fff;
+padding: 20px 0;
+text-align: center;
+
+width: 100%;
+}
+
+.footer-content {
+max-width: 800px;
+margin: 0 auto;
+display: flex;
+justify-content: space-between;
+}
+
+.footer-section {
+flex-basis: 45%;
+text-align: left;
+}
+
+.footer-section h3 {
+font-size: 18px;
+margin-bottom: 10px;
+}
+
+.footer-section ul {
+list-style: none;
+padding: 0;
+}
+
+.footer-section ul li {
+margin-bottom: 5px;
+}
+
+.footer-section ul li a {
+color: #fff;
+text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+text-decoration: underline;
+}
+
+
+#log-logo1{
+    font-size: 1000%;
+    margin: 0 auto;
+}
+
+.name{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.ProgressionGraph{
+    margin: 0 auto;
+}
+
+.page{
+    width: 1000px;
+}
+
+.button {
+    background-color: #C2D8B9;
+    color: white;
+    padding: 16px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    border-radius: 10px;
+    margin: 0 auto;
+    min-width: fit-content;
+    margin-top: 30px;
+  }
+  
+  .button1 {
+    background-color: #C2D8B9; 
+    color: black; 
+    border: 2px solid #C2D8B9;
+  }
+  
+  .button1:hover {
+    background-color: white;
+    color: #C2D8B9;
+  }
+
+  i,a{
+    color: black;
+}
+
+aside{
+    min-width: 220px;
+}
+
+
+span{
+    color: black;
+}
+

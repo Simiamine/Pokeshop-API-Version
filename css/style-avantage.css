@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat|Quicksand');
+  body {
+    background-color: #f4f4f4; /* Couleur de fond grise */
+    font-family: 'quicksand',Arial, Helvetica, sans-serif;
+  }
+  
+  /* Style pour le titre "Le programme de fidélité" */
+  .program-title {
+    color: #000; /* Couleur de texte noire */
+    font-size: 24px; /* Taille de la police */
+    font-weight: bold; /* Police en gras */
+    text-align: center; /* Alignement du texte au centre */
+    margin-bottom: 10px; /* Espacement en bas du titre */
+  }
+  
+  /* Style pour la description du programme */
+  .program-description {
+    color: #333; /* Couleur de texte foncée */
+    font-size: 18px; /* Taille de la police */
+    text-align: center; /* Alignement du texte au centre */
+    margin-bottom: 20px; /* Espacement en bas de la description */
+  }
+  
+    
+    button {
+      background-color: #FFA07A; /* Couleur orange pastel */
+      color: black;
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px; /* Bordures arrondies pour le bouton */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre douce pour le bouton */
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.3s ease; /* Animation douce pour le survol */
+    }
+    button:hover {
+      background-color: #FF7F50; /* Couleur plus foncée au survol */
+    }
+  
+  
+  /* Media query pour ajuster la taille sur les petits écrans */
+  @media (max-width: 768px) {
+    .program-title {
+      font-size: 20px; /* Taille de la police plus petite */
+    }
+    .program-description {
+      font-size: 16px; /* Taille de la police plus petite */
+    }
+    .join-button {
+      padding: 10px 20px; /* Padding intérieur réduit */
+    }
+  }
+
+
+/*pour positionner les images*/
+.container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2%;
+  }
+  
+  .text-with-image, .image-with-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .text, .text2 {
+    max-width: 40%;
+  }
+  
+  .image-right, .image-left, .image2 {
+    width: 50%;
+    text-align: center;
+  }
+  
+  .image-right img, .image-left img, .image2 img {
+    width: 50%;
+    height: auto;
+  }
+  
+  .image-left, .image2 {
+    align-self: flex-start;
+    order: 2; 
+  }
+  
+  /* Nouvelle classe pour aligner le texte à droite */
+  .image-with-text {
+    flex-direction: row-reverse; /* Inverse l'ordre pour que le texte soit à droite et l'image à gauche */
+  }
+  
+  .text2 {
+    order: 1; /* S'assure que le texte est placé en premier dans le flux, donc à droite visuellement */
+    align-self: center;
+  }
+  
+  .image2 {
+    order: 2; /* L'image à gauche */
+  }
+
+  
+
+  

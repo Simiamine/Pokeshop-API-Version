@@ -1,0 +1,182 @@
+
+.form-container {
+    max-width: 500px; /* Réglez la largeur maximale selon vos besoins */
+    margin: 0 auto; /* Centre le formulaire horizontalement */
+    padding: 20px; /* Ajoute de l'espacement intérieur autour du formulaire */
+}
+
+.form-label {
+    display: block; /* Affiche les étiquettes de formulaire en tant que bloc pour le positionnement vertical */
+    margin-bottom: 10px; /* Espacement entre les étiquettes de formulaire */
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px; /* Espacement entre les champs de formulaire */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+/* Styles pour les options de la liste déroulante */
+select[name="type_1"],
+select[name="type_2"] {
+    /* Styles généraux pour la liste déroulante */
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    /* Utilisation d'une image pour l'icône de flèche déroulante */
+    background-image: url('path/to/arrow-icon.png');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    /* Ajout d'un gradient de fond */
+    background: linear-gradient(to bottom, #f9f9f9, #ddd);
+}
+
+/* Styles personnalisés pour chaque option en fonction du type */
+select[name="type_1"] option,
+select[name="type_2"] option {
+    padding: 8px;
+    border-radius: 5px;
+}
+
+/* Normal */
+select[name="type_1"] option[value="normal"],
+select[name="type_2"] option[value="normal"] {
+    background-color: #929da3;
+    color: #fff;
+}
+
+/* Combat */
+select[name="type_1"] option[value="combat"],
+select[name="type_2"] option[value="combat"] {
+    background-color: #cf406b;
+    color: #fff;
+}
+
+/* Vol */
+select[name="type_1"] option[value="vol"],
+select[name="type_2"] option[value="vol"] {
+    background-color: #8fa8df;
+    color: #fff;
+}
+
+/* Poison */
+select[name="type_1"] option[value="poison"],
+select[name="type_2"] option[value="poison"] {
+    background-color: #ab6ac8;
+    color: #fff;
+}
+
+/* Sol */
+select[name="type_1"] option[value="sol"],
+select[name="type_2"] option[value="sol"] {
+    background-color: #d97944;
+    color: #fff;
+}
+
+/* Roche */
+select[name="type_1"] option[value="roche"],
+select[name="type_2"] option[value="roche"] {
+    background-color: #c5b68d;
+    color: #fff;
+}
+
+/* Insecte */
+select[name="type_1"] option[value="insecte"],
+select[name="type_2"] option[value="insecte"] {
+    background-color: #91c12f;
+    color: #fff;
+}
+
+/* Spectre */
+select[name="type_1"] option[value="spectre"],
+select[name="type_2"] option[value="spectre"] {
+    background-color: #5268ac;
+    color: #fff;
+}
+
+/* Acier */
+select[name="type_1"] option[value="acier"],
+select[name="type_2"] option[value="acier"] {
+    background-color: #5b8ea3;
+    color: #fff;
+}
+
+/* Feu */
+select[name="type_1"] option[value="feu"],
+select[name="type_2"] option[value="feu"] {
+    background-color: #fe9d54;
+    color: #fff;
+}
+
+/* Eau */
+select[name="type_1"] option[value="eau"],
+select[name="type_2"] option[value="eau"] {
+    background-color: #5190d7;
+    color: #fff;
+}
+
+/* Plante */
+select[name="type_1"] option[value="plante"],
+select[name="type_2"] option[value="plante"] {
+    background-color: #63bc5a;
+    color: #fff;
+}
+
+/* Électrique */
+select[name="type_1"] option[value="electrique"],
+select[name="type_2"] option[value="electrique"] {
+    background-color: #f5d33c;
+    color: #fff;
+}
+
+/* Psy */
+select[name="type_1"] option[value="psy"],
+select[name="type_2"] option[value="psy"] {
+    background-color: #fb7178;
+    color: #fff;
+}
+
+/* Glace */
+select[name="type_1"] option[value="glace"],
+select[name="type_2"] option[value="glace"] {
+    background-color: #72cfc0;
+    color: #fff;
+}
+
+/* Dragon */
+select[name="type_1"] option[value="dragon"],
+select[name="type_2"] option[value="dragon"] {
+    background-color: #0a6dc2;
+    color: #fff;
+}
+
+/* Ténèbre */
+select[name="type_1"] option[value="tenebre"],
+select[name="type_2"] option[value="tenebre"] {
+    background-color: #5a5564;
+    color: #fff;
+}
+
+/* Fée */
+select[name="type_1"] option[value="fee"],
+select[name="type_2"] option[value="fee"] {
+    background-color: #ec8ee7;
+    color: #fff;
+}
