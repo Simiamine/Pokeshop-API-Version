@@ -55,6 +55,35 @@ class CommandeViewSet(viewsets.ModelViewSet):
     queryset = Commande.objects.all()
     serializer_class = CommandeSerializer
 
+    # Suivre l'état de la livraison
+    @action(detail=True, methods=['get'], url_path='suivi-livraison')
+    def suivi_livraison(self, request, pk=None):
+        commande = self.get_object()
+        return Response({
+            "numero_commande": commande.numero_commande,
+            "statut_livraison": commande.statut_livraison,
+            "adresse_livraison": commande.adresse_livraison,
+            "ville": commande.ville,
+            "code_postal": commande.code_postal
+        })
+
+    # Mettre à jour les informations de livraison
+    @action(detail=True, methods=['put'], url_path='update-livraison')
+    def update_livraison(self, request, pk=None):
+        commande = self.get_object()
+        commande.adresse_livraison = request.data.get('adresse_livraison', commande.adresse_livraison)
+        commande.ville = request.data.get('ville', commande.ville)
+        commande.code_postal = request.data.get('code_postal', commande.code_postal)
+        commande.statut_livraison = request.data.get('statut_livraison', commande.statut_livraison)
+        commande.save()
+        return Response({
+            "message": "Les informations de livraison ont été mises à jour.",
+            "adresse_livraison": commande.adresse_livraison,
+            "ville": commande.ville,
+            "code_postal": commande.code_postal,
+            "statut_livraison": commande.statut_livraison
+        }, status=status.HTTP_200_OK)
+
 # Vue pour gérer le Pokedex
 class PokedexViewSet(viewsets.ModelViewSet):
     queryset = Pokedex.objects.all()

@@ -15,4 +15,7 @@ urlpatterns += [
     path('inscription/', UserRegisterView.as_view(), name='inscription'),
     path('utilisateurs/<int:pk>/modifier/', UserUpdateDeleteView.as_view(), name='modifier-utilisateur'),
     path('utilisateurs/<int:pk>/supprimer/', UserUpdateDeleteView.as_view(), name='supprimer-utilisateur'),
+    path('commandes/<int:pk>/suivi-livraison/', CommandeViewSet.as_view({'get': 'suivi_livraison'}), name='suivi-livraison'),
+    path('commandes/<int:pk>/update-livraison/', CommandeViewSet.as_view({'patch': 'update_livraison'}), name='update-livraison'),
+
 ]
