@@ -1,10 +1,15 @@
 from rest_framework import serializers
 from .models import Utilisateur, Commande, Pokedex
+from django.contrib.auth.hashers import make_password
 
 class UtilisateurSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateur
         fields = '__all__'
+
+    # Hashing du mot de passe avant de sauvegarder
+    def validate_mot_de_passe(self, value):
+        return make_password(value)
 
 class CommandeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,4 +19,4 @@ class CommandeSerializer(serializers.ModelSerializer):
 class PokedexSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pokedex
-        fields = '__all__'  # Inclure tous les champs de la table pokedex
+        fields = '__all__'

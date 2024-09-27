@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 class Utilisateur(models.Model):
     prenom = models.CharField(max_length=150)  # Réduction à 150 caractères
@@ -60,8 +61,8 @@ class Pokedex(models.Model):
         managed = False
 
     def save(self, *args, **kwargs):
-        # Vérifie si un Pokémon avec le même ID existe déjà
-        if Pokedex.objects.filter(id=self.id).exists():
+    # Vérifie uniquement lors de la création
+        if self.pk is None and Pokedex.objects.filter(id=self.id).exists():
             raise ValidationError(f"Un Pokémon avec l'ID {self.id} existe déjà.")
         super(Pokedex, self).save(*args, **kwargs)
 
