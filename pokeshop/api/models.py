@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 class Utilisateur(models.Model):
     prenom = models.CharField(max_length=150)  # Réduction à 150 caractères
@@ -77,3 +78,23 @@ class Pokedex(models.Model):
 
     def __str__(self):
         return self.nom
+
+class Paiement(models.Model):
+    STATUT_CHOICES = [
+        ('en_attente', 'En attente'),
+        ('valide', 'Validé'),
+        ('echoue', 'Échoué'),
+    ]
+
+    transaction_id = models.CharField(max_length=100, unique=True)
+    commande = models.ForeignKey(Commande, on_delete=models.CASCADE)
+    montant = models.DecimalField(max_digits=10, decimal_places=2)
+    statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='en_attente')
+    date_creation = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        db_table = 'paiement'  # Correspond à la table existante 'paiement'
+        managed = False
+
+    def __str__(self):
+        return f"Paiement {self.transaction_id} - Statut : {self.statut}"

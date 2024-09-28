@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Utilisateur, Commande, Pokedex
+from .models import Utilisateur, Commande, Pokedex, Paiement
 from django.contrib.auth.hashers import make_password
 
 class UtilisateurSerializer(serializers.ModelSerializer):
@@ -19,4 +19,9 @@ class CommandeSerializer(serializers.ModelSerializer):
 class PokedexSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pokedex
+        fields = '__all__'
+
+class PaiementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Paiement
         fields = '__all__'

@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from .views import UtilisateurViewSet, CommandeViewSet, PokedexViewSet, UserRegisterView, UserUpdateDeleteView
+from .views import UtilisateurViewSet, CommandeViewSet, PokedexViewSet, UserRegisterView, UserUpdateDeleteView, PaiementView, StatutPaiementView, stripe_webhook
 
 router = DefaultRouter()
 router.register(r'utilisateurs', UtilisateurViewSet)
@@ -17,5 +17,7 @@ urlpatterns += [
     path('utilisateurs/<int:pk>/supprimer/', UserUpdateDeleteView.as_view(), name='supprimer-utilisateur'),
     path('commandes/<int:pk>/suivi-livraison/', CommandeViewSet.as_view({'get': 'suivi_livraison'}), name='suivi-livraison'),
     path('commandes/<int:pk>/update-livraison/', CommandeViewSet.as_view({'patch': 'update_livraison'}), name='update-livraison'),
-
+    path('paiements/traiter/', PaiementView.as_view(), name='paiement-traiter'),
+    path('paiements/statut/<str:transaction_id>/', StatutPaiementView.as_view(), name='paiement-statut'),
+    path('webhook/', stripe_webhook, name='stripe-webhook'),
 ]
