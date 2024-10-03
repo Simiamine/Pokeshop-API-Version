@@ -116,6 +116,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+AUTHENTICATION_BACKENDS = [
+    'api.backends.CustomUserBackend',  # Ajout de notre backend personnalisé
+    'django.contrib.auth.backends.ModelBackend',  # Le backend par défaut de Django
+]
+
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
