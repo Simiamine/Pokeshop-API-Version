@@ -23,7 +23,7 @@ class CommandeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Commande
-        fields = ['id', 'numero_commande', 'adresse_livraison', 'ville', 'code_postal', 'livraison', 'total', 'statut', 'details']
+        fields = ['id', 'utilisateur_id', 'adresse_livraison', 'ville', 'code_postal', 'livraison', 'total', 'numero_commande', 'date_creation', 'statut', 'statut_livraison']
 
     def create(self, validated_data):
         # Extraire les produits et quantités
