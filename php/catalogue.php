@@ -1,18 +1,17 @@
 <?php 
     session_start();
-    require  '../include/databaseconnect.php'
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="../js/catalogue.js"></script>
     <title>Pokedex</title>
     <script src="https://kit.fontawesome.com/d6a49ddf6e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style2.css">
     <link rel="icon" type="image/png" href="../img/icon.png"/>
-     <!-- j'ai modifié -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -32,115 +31,147 @@
 
 <div class="cards-container">
 <?php
-$requete = $bdd->query("SELECT * FROM Pokedex");
-foreach ($requete as $pokemon) {
-    $bg_color = "#929da3";
+// URL de l'API Django
+$api_url = 'http://127.0.0.1:8000/api/pokedex/';
 
-    switch ($pokemon['type_1']) {
-        case 'normal':
-            $bg_color = "#929da3";
-            break;
-        case 'combat':
-            $bg_color = "#cf406b";
-            break;
-        case 'vol':
-            $bg_color = "#8fa8df";
-            break;
-        case 'poison':
-            $bg_color = "#ab6ac8";
-            break;
-        case 'sol':
-            $bg_color = "#d97944";
-            break;
-        case 'roche':
-            $bg_color = "#c5b68d";
-            break;
-        case 'insecte':
-            $bg_color = "#91c12f";
-            break;
-        case 'spectre':
-            $bg_color = "#5268ac";
-            break;
-        case 'acier':
-            $bg_color = "#5b8ea3";
-            break;
-        case 'feu':
-            $bg_color = "#fe9d54";
-            break;
-        case 'eau':
-            $bg_color = "#5190d7";
-            break;
-        case 'plante':
-            $bg_color = "#63bc5a";
-            break;
-        case 'electrique':
-            $bg_color = "#f5d33c";
-            break;
+// Initialisation de cURL
+$curl = curl_init($api_url);
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-        default: 
-            echo "";
-            break;
-    }   
-    // Utilisez $bg_color comme vous le souhaitez ici
+// Exécution de la requête
+$response = curl_exec($curl);
 
-    ?>
+// Vérification des erreurs de cURL
+if(curl_errno($curl)) {
+    echo 'Erreur cURL : ' . curl_error($curl);
+} else {
+    // Décodage du JSON reçu de l'API
+    $pokemons = json_decode($response, true);
 
-   <div class="card" style="width: 18rem; background-color: <?php echo $bg_color; ?>;"
-        data-id="<?php echo $pokemon['id']; ?>" 
-        data-name="<?php echo $pokemon['nom']; ?>" 
-        data-image="../img/<?php echo $pokemon['image']; ?>" 
-        data-description="<?php echo $pokemon['description']; ?>"
-        data-type="<?php echo $pokemon['type_1']; ?>"
-        data-type2="<?php echo $pokemon['type_2']; ?>"
-        generation ="<?php echo $pokemon['generation']; ?>"
-        legendaire ="<?php echo $pokemon['légendaire']; ?>"
-        quantite ="<?php echo $pokemon['quantité']; ?>"
-        
-        
-    >
+    // Parcourir chaque Pokémon récupéré de l'API
+    foreach ($pokemons as $pokemon) {
+        $bg_color = "#929da3";
 
-        <div class="card-img-top-container">
-            <img src="../img/<?php echo $pokemon['image']; ?>" class="card-img-top" alt="Image du pokemon">
-        </div>
-        <div class="card-body">
-            <h5 class="card-title"><?php echo $pokemon['nom']; ?></h5>
-            <p class="card-text">
-                <span class="pokemon-type"><?php echo $pokemon['type_1']; ?></span>
-                <span class="pokemon-type"><?php echo $pokemon['type_2']; ?></span>
-            </p>
+        switch ($pokemon['type_1']) {
+            case 'normal':
+                $bg_color = "#929da3";
+                break;
+            case 'combat':
+                $bg_color = "#cf406b";
+                break;
+            case 'vol':
+                $bg_color = "#8fa8df";
+                break;
+            case 'poison':
+                $bg_color = "#ab6ac8";
+                break;
+            case 'sol':
+                $bg_color = "#d97944";
+                break;
+            case 'roche':
+                $bg_color = "#c5b68d";
+                break;
+            case 'insecte':
+                $bg_color = "#91c12f";
+                break;
+            case 'spectre':
+                $bg_color = "#5268ac";
+                break;
+            case 'acier':
+                $bg_color = "#5b8ea3";
+                break;
+            case 'feu':
+                $bg_color = "#fe9d54";
+                break;
+            case 'eau':
+                $bg_color = "#5190d7";
+                break;
+            case 'plante':
+                $bg_color = "#63bc5a";
+                break;
+            case 'electrique':
+                $bg_color = "#f5d33c";
+                break;
 
-    <?php
-        $prixOriginal = floatval($pokemon['prix']);
-        $remise = floatval($pokemon['discount']);
+            default: 
+                echo "";
+                break;
+        }   
 
-        // Vérifie si une remise est appliquée
-        if ($remise > 0) {
-            $prixApresRemise = $prixOriginal - ($prixOriginal * ($remise / 100));
-            ?>
-            <p class="card-text">
-                Prix Original: <span class="original-price"><?php echo number_format($prixOriginal, 2, '.', ''); ?>€</span>
-            </p>
-            <div class="card-footer">
-                Prix remise: 
-                <span class="discounted-price"><?php echo number_format($prixApresRemise, 2, '.', ''); ?>€</span>
-            </div>
-            <?php
-        } else {
-            // Affiche simplement le prix original sans le barrer
-        ?>
-            <p class="card-text">
-                Prix: <span class="price"><?php echo number_format($prixOriginal, 2, '.', ''); ?>€</span>
-            </p>
-            <?php
-    }
+        // Utilisation de $bg_color comme couleur de fond
+
+
 ?>
-<div id="no-results" style="display: none;">
-    <p>Désolé, nous n'avons pas trouvé de résultat pour votre recherche. Voici quelques produits qui pourraient vous intéresser :</p>
-    <div id="suggested-pokemon"></div>
-</div>
+<?php
+// Vérifier si la clé 'légendaire' existe avant de l'utiliser
+$legendaire = isset($pokemon['légendaire']) ? $pokemon['légendaire'] : 'Non défini';
 
-    </div>
-    </div>
+// Vérifier si la clé 'quantité' existe avant de l'utiliser
+$quantite = isset($pokemon['quantité']) ? $pokemon['quantité'] : 'Non défini';
+
+?>
+<div class="card" style="width: 18rem; background-color: <?php echo $bg_color; ?>;"
+    data-id="<?php echo $pokemon['id']; ?>" 
+    data-name="<?php echo $pokemon['nom']; ?>" 
+    data-image="../img/<?php echo $pokemon['image']; ?>" 
+    data-description="<?php echo $pokemon['description']; ?>"
+    data-type="<?php echo $pokemon['type_1']; ?>"
+    data-type2="<?php echo $pokemon['type_2']; ?>"
+    generation ="<?php echo $pokemon['generation']; ?>"
+    legendaire ="<?php echo $legendaire; ?>"  
+    quantite ="<?php echo $quantite; ?>"   
+>
+
+            <div class="card-img-top-container">
+                <img src="../img/<?php echo $pokemon['image']; ?>" class="card-img-top" alt="Image du pokemon">
+            </div>
+            <div class="card-body">
+                <h5 class="card-title"><?php echo $pokemon['nom']; ?></h5>
+                <p class="card-text">
+                    <span class="pokemon-type"><?php echo $pokemon['type_1']; ?></span>
+                    <span class="pokemon-type"><?php echo $pokemon['type_2']; ?></span>
+                </p>
+
+                <?php
+                $prixOriginal = floatval($pokemon['prix']);
+                $remise = floatval($pokemon['discount']);
+
+                // Vérifie si une remise est appliquée
+                if ($remise > 0) {
+                    $prixApresRemise = $prixOriginal - ($prixOriginal * ($remise / 100));
+                ?>
+                    <p class="card-text">
+                        Prix Original: <span class="original-price"><?php echo number_format($prixOriginal, 2, '.', ''); ?>€</span>
+                    </p>
+                    <div class="card-footer">
+                        Prix remise: 
+                        <span class="discounted-price"><?php echo number_format($prixApresRemise, 2, '.', ''); ?>€</span>
+                    </div>
+                <?php
+                } else {
+                ?>
+                    <p class="card-text">
+                        Prix: <span class="price"><?php echo number_format($prixOriginal, 2, '.', ''); ?>€</span>
+                    </p>
+                <?php
+                }
+                ?>
+
+        <div id="no-results" style="display: none;">
+            <p>Désolé, nous n'avons pas trouvé de résultat pour votre recherche. Voici quelques produits qui pourraient vous intéresser :</p>
+            <div id="suggested-pokemon"></div>
+        </div>
+
+        </div>
+        </div>
+
+        <?php
+    }
+}
+
+// Fermeture de cURL
+curl_close($curl);
+?>
 
     <div id="pokemonPopup" class="popup" style="display: none;">
     <div class="popup-content">
@@ -162,9 +193,7 @@ foreach ($requete as $pokemon) {
         </div>
     </div>
 </div>
-<?php
-    }
- ?>
+
 <script>
 
 //barre de recherche
