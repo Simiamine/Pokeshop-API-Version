@@ -11,7 +11,7 @@ require '../include/databaseconnect.php';
     <script src="../js/catalogue.js"></script>
     <title>Pokedex</title>
     <script src="https://kit.fontawesome.com/d6a49ddf6e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style2.css">
     <link rel="icon" type="image/png" href="../img/icon.png"/>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -42,7 +42,7 @@ $userId = $_SESSION['user_id'];
 $sql = "SELECT lc.pokemon
         FROM ligne_commandes lc
         JOIN commandes c ON lc.id_commande = c.id
-        WHERE c.id_utilisateur = :userId"; 
+        WHERE c.utilisateur_id = :userId"; 
         
 $requete = $bdd->prepare($sql);
 $requete->bindParam(':userId', $userId, PDO::PARAM_INT);
