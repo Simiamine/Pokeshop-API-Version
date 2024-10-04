@@ -46,68 +46,72 @@ function mailMdp(){  // Fonction changer mdp
   });
 }
 
-function connex(){  // Fonction connexion
-  // On retire la classe de clignottement d'input erreur dans chaque input
+// Fonction pour gérer la connexion
+function connex() {
   $('input').removeClass('input_erreur');
 
   var email = $("#emailc").val();
   var mdp = $("#mdp").val();
 
-  // Prépare les données pour l'envoi à la page PHP sous forme d'objet JavaScript
+  if (email === '' || mdp === '') {
+    $("#rep_connexion").html("Veuillez remplir tous les champs");
+    $("#rep_connexion").addClass("alert-rouge");
+    return false;
+  }
+
   var donnee = {
-    emailc : email,
-    mdp : mdp,
+    email: email,
+    password: mdp,
   };
-  // Envoi de la requête AJAX avec jQuery
+
+  // Envoi de la requête pour obtenir les tokens et l'ID utilisateur
   $.ajax({
-    type: "POST", // Méthode HTTP POST
-    url: "verifUser.php", // URL de la page PHP de traitement
-    data: donnee, // Données à envoyer
-    dataType: "json", // Type de données attendu en réponse
+    type: "POST",
+    url: "http://127.0.0.1:8000/api/auth/login/",
+    data: JSON.stringify(donnee),
+    contentType: "application/json",
+    dataType: "json",
 
     success: function(response) {
-        $('#rep_connexion').empty();  // clear la div reponse
-        $('#rep_connexion').removeClass()  // Enleve toute les classe
-        if(response['email'] != undefined && response['mdp'] != undefined){
-          if(response['email'] == 0){
-            $("#rep_connexion").html("Veuillez remplir les champs en surbrillance");
-            $("#rep_connexion").addClass("alert-rouge");
-            $('#emailc').addClass('input_erreur');
-          }
-          if(response['mdp'] == 0){
-            $("#rep_connexion").html("Veuillez remplir les champs en surbrillance");
-            $("#rep_connexion").addClass("alert-rouge");
-            $('#mdp').addClass('input_erreur');
-          }
-        }
-        else if(response['temps'] != undefined){
-          if(response['temps'] == "non"){
-            $("#rep_connexion").html("Les identifiants sont incorrects<br>Veuillez réessayer");
-            $("#rep_connexion").addClass("alert-rouge");
-          }
-          else{
-            $("#rep_connexion").html("Veuillez attendre : "+ response['temps'] +" secondes");
-            $("#rep_connexion").addClass("alert-orange");
-          }
-        }
-        else if(response['connecte'] != undefined){
-          if(response['connecte'] == 1){
-            window.location.href = "../index.php";
-          }
-        };
-        console.log(response);
+      if (response.access && response.refresh) {
+        // Stocker les tokens et le statut dans localStorage
+        localStorage.setItem('access_token', response.access);
+        localStorage.setItem('refresh_token', response.refresh);
+        localStorage.setItem('user_statut', response.statut);  // Stocker le rôle utilisateur
 
-
+        // Rediriger en fonction du rôle de l'utilisateur
+        if (response.statut === 'admin') {
+          window.location.href = "../admin/dashboard.php";  // Redirection admin
+        } else if (response.statut === 'client') {
+          window.location.href = "../client/compte_client.php";  // Redirection client
+        } else {
+          $("#rep_connexion").html("Rôle utilisateur inconnu.");
+          $("#rep_connexion").addClass("alert-rouge");
+        }
+      } else {
+        $("#rep_connexion").html("Erreur lors de la connexion");
+        $("#rep_connexion").addClass("alert-rouge");
+      }
     },
 
     error: function(xhr, status, error) {
-        // Fonction appelée en cas d'erreur
-        console.error("Erreur: " + error);
-        console.error("Status: " + status);
+      if (xhr.status == 401) {
+        $("#rep_connexion").html("Email ou mot de passe incorrect");
+        $("#rep_connexion").addClass("alert-rouge");
+      } else {
+        $("#rep_connexion").html("Erreur lors de la connexion");
+        $("#rep_connexion").addClass("alert-rouge");
+      }
     }
   });
 
+  return false;
 }
+
+
+
+
+
 
 function inscript(){  // Fonction inscription
     // On retire la classe de clignottement d'input erreur dans chaque input
@@ -292,7 +296,7 @@ function inscript(){  // Fonction inscription
 }
 
 function toggleSignup(){
-	document.getElementById("login-toggle").style.backgroundColor="#fff";
+    document.getElementById("login-toggle").style.backgroundColor="#fff";
   document.getElementById("login-toggle").style.color="#222";
   document.getElementById("signup-toggle").style.backgroundColor="#ee1515";
   document.getElementById("signup-toggle").style.color="#fff";
@@ -302,7 +306,7 @@ function toggleSignup(){
 }
 
 function toggleMdp(){
-	document.getElementById("login-toggle").style.backgroundColor="#fff";
+    document.getElementById("login-toggle").style.backgroundColor="#fff";
   document.getElementById("login-toggle").style.color="#222";
   document.getElementById("signup-toggle").style.backgroundColor="#fff";
   document.getElementById("signup-toggle").style.color="#222";

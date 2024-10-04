@@ -1,6 +1,5 @@
 <?php
 session_start();
-require '../include/databaseconnect.php';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -24,74 +23,90 @@ require '../include/databaseconnect.php';
     $("#pokedex").addClass("active");  // Fonction pour mettre la class "active" en fonction de la page
 </script>
 
-
 <body>  
-
 
 <div class="cards-container">
 <?php
-// Vérification que l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
+// Vérification de la présence du token d'accès dans la session
+if (!isset($_SESSION['access_token'])) {
     echo "<p>Vous devez être connecté pour voir vos commandes.</p>";
     exit; // Stoppe l'exécution du script si l'utilisateur n'est pas connecté
 }
 
-// Utilisation de l'ID de l'utilisateur connecté pour filtrer les commandes
-$userId = $_SESSION['user_id'];
+// Récupérer le token d'accès depuis la session
+$accessToken = $_SESSION['access_token'];
 
-$sql = "SELECT lc.pokemon
-        FROM ligne_commandes lc
-        JOIN commandes c ON lc.id_commande = c.id
-        WHERE c.utilisateur_id = :userId"; 
+// Récupérer les commandes de l'utilisateur via l'API
+$ch = curl_init('http://127.0.0.1:8000/api/utilisateurs/'.$_SESSION['user_id'].'/commandes/');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $accessToken,
+    'Content-Type: application/json'
+]);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($httpCode === 200) {
+    $commandes = json_decode($response, true);
+    
+    if (!empty($commandes)) {
+        $pokedex = [];
+        // Parcourir les commandes et récupérer les Pokémon dans le champ 'details'
+        foreach ($commandes as $commande) {
+            if (isset($commande['details']) && is_array($commande['details'])) {
+                foreach ($commande['details'] as $detail) {
+                    $pokedex[] = $detail['produit_nom'];  // Assumption that 'produit_nom' is the name of the Pokémon
+                }
+            }
+        }
         
-$requete = $bdd->prepare($sql);
-$requete->bindParam(':userId', $userId, PDO::PARAM_INT);
-$requete->execute();
-$pokedex = array();  // Liste vide qui va contenir les id des pokemons
+        // Rendre les IDs uniques pour éviter les doublons
+        $pokedex = array_unique($pokedex);
+        
+        // Pour chaque Pokémon, récupérer ses informations via l'API
+        foreach ($pokedex as $pokemonName) {
+            $pokemonApiUrl = 'http://127.0.0.1:8000/api/pokedex/?nom=' . urlencode($pokemonName);
+            $ch = curl_init($pokemonApiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $accessToken,
+                'Content-Type: application/json'
+            ]);
 
-while ($ligne_commandes = $requete->fetch(PDO::FETCH_ASSOC)) {
-    $pokemonJson = $ligne_commandes['pokemon'];
-    $pokemon = json_decode($pokemonJson, true);
+            $pokemonResponse = curl_exec($ch);
+            curl_close($ch);
+            $pokemonData = json_decode($pokemonResponse, true);
 
-    // Vérifier que la conversion a réussi
-    if (json_last_error() === JSON_ERROR_NONE && is_array($pokemon)) {
-        foreach ($pokemon as $cle => $val) {
-            $pokedex[] = $cle;
+            if (!empty($pokemonData)) {
+                $pokemon = $pokemonData[0];  // Assuming the API returns an array of one Pokémon
+
+                // Affichage des cartes pour chaque Pokémon
+                echo '<div class="card">' .
+                     '<div class="card-img-top-container">' .
+                     '<img src="' . htmlspecialchars($pokemon['image'], ENT_QUOTES) . '" alt="Image de ' . htmlspecialchars($pokemon['nom'], ENT_QUOTES) . '" class="card-img-top">' .
+                     '</div>' .
+                     '<div class="card-body">' .
+                     '<h5 class="card-title">' . htmlspecialchars($pokemon['nom'], ENT_QUOTES) . '</h5>' .
+                     '<p class="card-text">' .
+                     '<strong>Type principal:</strong> ' . htmlspecialchars($pokemon['type_1'], ENT_QUOTES) .
+                     (empty($pokemon['type_2']) ? '' : ', <strong>Type secondaire:</strong> ' . htmlspecialchars($pokemon['type_2'], ENT_QUOTES)) .
+                     '<br><strong>Génération:</strong> ' . htmlspecialchars($pokemon['generation'], ENT_QUOTES) .
+                     '<br><strong>Légendaire:</strong> ' . ($pokemon['legendaire'] ? 'Oui' : 'Non') .
+                     '</p>' .
+                     '</div>' .
+                     '</div>';
+            } else {
+                echo "<p>Impossible de récupérer les détails pour le Pokémon : " . htmlspecialchars($pokemonName) . "</p>";
+            }
         }
     } else {
-        // Afficher un message d'erreur détaillé
-        echo "ERREUR DE CONVERSION JSON : " . json_last_error_msg();
-        echo " - Valeur de pokemon : " . htmlspecialchars($pokemonJson);
+        echo "<p>Aucune commande passée.</p>";
     }
+} else {
+    echo "<p>Erreur lors de la récupération des commandes. Veuillez réessayer plus tard.</p>";
 }
-
-$pokedex = array_unique($pokedex);  // Enleve les doublons des id de pokemon
-
-foreach ($pokedex as $idPok) {
-    $sql = "SELECT p.nom as nom_pokemon, p.type_1, p.type_2, p.generation, p.légendaire, p.prix, p.discount, p.image, p.description
-            FROM pokedex p WHERE p.id = :idPok";
-    $requete = $bdd->prepare($sql);
-    $requete->bindParam(':idPok', $idPok, PDO::PARAM_INT);
-    $requete->execute();
-    // Récupérer le résultat
-    $ligne_commandes = $requete->fetch(PDO::FETCH_ASSOC);
-    echo '<div class="card">' .
-         '<div class="card-img-top-container">' .
-         '<img src="' . htmlspecialchars($ligne_commandes['image'], ENT_QUOTES) . '" alt="Image de ' . htmlspecialchars($ligne_commandes['nom_pokemon'], ENT_QUOTES) . '" class="card-img-top">' .
-         '</div>' .
-         '<div class="card-body">' .
-         '<h5 class="card-title">' . htmlspecialchars($ligne_commandes['nom_pokemon'], ENT_QUOTES) . '</h5>' .
-         '<p class="card-text">' .
-         '<strong>Type principal:</strong> ' . htmlspecialchars($ligne_commandes['type_1'], ENT_QUOTES) .
-         (empty($ligne_commandes['type_2']) ? '' : ', <strong>Type secondaire:</strong> ' . htmlspecialchars($ligne_commandes['type_2'], ENT_QUOTES)) .
-         '<br><strong>Génération:</strong> ' . htmlspecialchars($ligne_commandes['generation'], ENT_QUOTES) .
-         '<br><strong>Légendaire:</strong> ' . ($ligne_commandes['légendaire'] ? 'Oui' : 'Non') .
-
-         '</p>' .
-         '</div>' .
-         '</div>';
-}
-
 ?>
 </body>
 <style>

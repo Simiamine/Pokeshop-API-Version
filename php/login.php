@@ -7,9 +7,9 @@
     <title>S'identifier | Pokeshop</title>
     <script src="https://kit.fontawesome.com/d6a49ddf6e.js" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="../js/scriptLogin.js"></script>
-    <link rel="stylesheet" href="../css/style2.css">
-    <link rel="stylesheet" href="../css/login.css">
+    <script src="../js/scriptLogin2.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/login2.css">
     <link rel="icon" type="image/png" href="../img/icon.png"/>
 </head>
 <?php session_start();
@@ -17,7 +17,7 @@ include_once('../include/header.php'); ?>
 <script>
     $("#connexion").addClass("active");  // Fonction pour mettre la class "active" en fonction de la page
 </script>
-<body>
+<body>  
 
 <div class="form-modal">
     <div class="form-toggle">

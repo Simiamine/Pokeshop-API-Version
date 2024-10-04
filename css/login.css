@@ -1,7 +1,15 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat|Quicksand');
 
+body {
+    height: 100vh; /* 100% de la hauteur de la fenêtre */
+    margin: 0;
+    background-color: #f5f5f5; /* Arrière-plan pour la page */
+}
 
 .form-modal{
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position:relative;
     width:450px;
     height:auto;

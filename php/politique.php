@@ -13,7 +13,7 @@
     <title>Pokedex</title>
     <script src="../js/pokemon.js" defer></script>
     <script src="https://kit.fontawesome.com/d6a49ddf6e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="../css/style2.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/pokedex.css">
     </head>
 

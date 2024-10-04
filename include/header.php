@@ -6,7 +6,7 @@ $path = "/".basename(dirname(dirname(__FILE__)));  // Permet d'obtenir le nom du
     <div class="logo">
         <a href="<?php echo $path."/index.php";?>"><img src="<?php echo $path."/img/icon.png";?>" alt="pokeball" class="logo" width="50"></a>
     </div>
-    <div>
+    <div>   
         <ul id="navbar" style="display: flex;"> <!-- Ajout du style pour réduire l'espacement -->
             <?php if (isset($_SESSION['user_statut']) && $_SESSION['user_statut'] == 'client'){ ?>
             <li>Bonjour, <?= htmlspecialchars($_SESSION['user_name']); ?></li>
