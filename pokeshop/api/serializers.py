@@ -19,22 +19,28 @@ class CommandeProduitSerializer(serializers.ModelSerializer):
         fields = ['produit_nom', 'quantite']  # Affiche le nom du produit et la quantité
 
 class CommandeSerializer(serializers.ModelSerializer):
-    details = CommandeProduitSerializer(many=True)  # Utiliser le serializer des détails
+    details = CommandeProduitSerializer(many=True)  # Utilisation du serializer des détails
 
     class Meta:
         model = Commande
-        fields = ['id', 'utilisateur_id', 'adresse_livraison', 'ville', 'code_postal', 'livraison', 'total', 'numero_commande', 'date_creation', 'statut', 'statut_livraison', 'details']
+        fields = ['id', 'utilisateur', 'adresse_livraison', 'ville', 'code_postal', 'livraison', 'total', 'numero_commande', 'date_creation', 'statut', 'details']
 
     def create(self, validated_data):
-        # Extraire les produits et quantités
-        details_data = validated_data.pop('details')
+        # Extraire les détails de la commande
+        details_data = validated_data.pop('details', [])
+
+        # Créer la commande principale
         commande = Commande.objects.create(**validated_data)
 
+        # Ajouter les détails de la commande (produits et quantités)
         for detail in details_data:
             produit = detail.get('produit')
-            quantite = detail.get('quantite')
-            CommandeProduit.objects.create(commande=commande, produit=produit, quantite=quantite)
-        
+            quantite = detail.get('quantite', 1)  # Quantité par défaut à 1
+
+            if produit and quantite:
+                # Crée l'entrée CommandeProduit
+                CommandeProduit.objects.create(commande=commande, produit=produit, quantite=quantite)
+
         return commande
 
 class PokedexSerializer(serializers.ModelSerializer):

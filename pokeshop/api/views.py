@@ -113,13 +113,18 @@ class CommandeViewSet(viewsets.ModelViewSet):
     queryset = Commande.objects.all()
     serializer_class = CommandeSerializer
 
+    def perform_create(self, serializer):
+        # Permet de récupérer l'ID de l'utilisateur depuis le body de la requête
+        utilisateur = self.request.user
+        serializer.save()
+
     # Suivre l'état de la livraison
     @action(detail=True, methods=['get'], url_path='suivi-livraison')
     def suivi_livraison(self, request, pk=None):
         commande = self.get_object()
         return Response({
             "numero_commande": commande.numero_commande,
-            "statut_livraison": commande.statut_livraison,
+            "statut": commande.statut,
             "adresse_livraison": commande.adresse_livraison,
             "ville": commande.ville,
             "code_postal": commande.code_postal
@@ -133,8 +138,7 @@ class CommandeViewSet(viewsets.ModelViewSet):
         commande.adresse_livraison = request.data.get('adresse_livraison', commande.adresse_livraison)
         commande.ville = request.data.get('ville', commande.ville)
         commande.code_postal = request.data.get('code_postal', commande.code_postal)
-        commande.statut_livraison = request.data.get('statut_livraison', commande.statut_livraison)
-        commande.statut = request.data.get('statut', commande.statut)  # Permettre la mise à jour du statut
+        commande.statut = request.data.get('statut', commande.statut)
         commande.save()
         
         return Response({
@@ -142,8 +146,7 @@ class CommandeViewSet(viewsets.ModelViewSet):
             "adresse_livraison": commande.adresse_livraison,
             "ville": commande.ville,
             "code_postal": commande.code_postal,
-            "statut": commande.statut,
-            "statut_livraison": commande.statut_livraison
+            "statut": commande.statut
         }, status=status.HTTP_200_OK)
 
     # Ajouter des produits à une commande

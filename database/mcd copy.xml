@@ -1,74 +1,199 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mxfile host="app.diagrams.net">
-  <diagram name="MCD Project">
-    <mxGraphModel dx="1185" dy="640" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+  <diagram name="MCD Projet Pokeshop">
+    <mxGraphModel dx="960" dy="640" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <!-- Entité Utilisateur -->
-        <mxCell id="2" value="Utilisateur" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="100" y="60" width="120" height="120" as="geometry" />
+        <!-- Table Utilisateur -->
+        <mxCell id="2" value="Utilisateur" style="swimlane;fillColor=#D5E8D4;strokeColor=#000000;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="200" height="260" as="geometry" />
         </mxCell>
-        <mxCell id="3" value="id&#xa;prenom&#xa;nom&#xa;email&#xa;telephone&#xa;statut" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="2">
-          <mxGeometry x="0" y="0" width="120" height="120" as="geometry" />
+        <mxCell id="3" value="id: PK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="2">
+          <mxGeometry y="40" width="200" height="30" as="geometry" />
         </mxCell>
-
-        <!-- Entité Pokedex -->
-        <mxCell id="4" value="Pokedex" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="300" y="60" width="120" height="140" as="geometry" />
+        <mxCell id="4" value="prenom" style="fontSize=12;fontColor=#000000;" vertex="1" parent="2">
+          <mxGeometry y="70" width="200" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="5" value="id&#xa;nom&#xa;type_1&#xa;type_2&#xa;prix&#xa;quantite&#xa;description" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="4">
-          <mxGeometry x="0" y="0" width="120" height="140" as="geometry" />
+        <mxCell id="5" value="nom" style="fontSize=12;fontColor=#000000;" vertex="1" parent="2">
+          <mxGeometry y="100" width="200" height="30" as="geometry" />
         </mxCell>
-
-        <!-- Entité Commande -->
-        <mxCell id="6" value="Commande" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="100" y="240" width="120" height="140" as="geometry" />
+        <mxCell id="6" value="email: UNIQUE" style="fontSize=12;fontColor=#000000;" vertex="1" parent="2">
+          <mxGeometry y="130" width="200" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="7" value="id&#xa;adresse&#xa;ville&#xa;code_postal&#xa;total&#xa;statut" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="6">
-          <mxGeometry x="0" y="0" width="120" height="140" as="geometry" />
+        <mxCell id="7" value="telephone" style="fontSize=12;fontColor=#000000;" vertex="1" parent="2">
+          <mxGeometry y="160" width="200" height="30" as="geometry" />
         </mxCell>
-
-        <!-- Entité CommandeProduit -->
-        <mxCell id="8" value="CommandeProduit" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="300" y="240" width="120" height="60" as="geometry" />
+        <mxCell id="8" value="date_naissance" style="fontSize=12;fontColor=#000000;" vertex="1" parent="2">
+          <mxGeometry y="190" width="200" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="9" value="commande_id&#xa;produit_id&#xa;quantite" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="8">
-          <mxGeometry x="0" y="0" width="120" height="60" as="geometry" />
+        <mxCell id="9" value="password" style="fontSize=12;fontColor=#000000;" vertex="1" parent="2">
+          <mxGeometry y="220" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="statut" style="fontSize=12;fontColor=#000000;" vertex="1" parent="2">
+          <mxGeometry y="250" width="200" height="30" as="geometry" />
         </mxCell>
 
-        <!-- Entité Paiement -->
-        <mxCell id="10" value="Paiement" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="500" y="60" width="120" height="80" as="geometry" />
+        <!-- Table Commande -->
+        <mxCell id="11" value="Commande" style="swimlane;fillColor=#FFE6CC;strokeColor=#000000;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="320" y="60" width="240" height="320" as="geometry" />
         </mxCell>
-        <mxCell id="11" value="id&#xa;transaction_id&#xa;montant&#xa;statut" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="10">
-          <mxGeometry x="0" y="0" width="120" height="80" as="geometry" />
+        <mxCell id="12" value="id: PK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="40" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="utilisateur_id: FK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="70" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="adresse_livraison" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="100" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="ville" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="130" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="code_postal" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="160" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="livraison" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="190" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="total" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="220" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="numero_commande" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="250" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="date_creation" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="280" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="statut" style="fontSize=12;fontColor=#000000;" vertex="1" parent="11">
+          <mxGeometry y="310" width="240" height="30" as="geometry" />
         </mxCell>
 
-        <!-- Entité Avis -->
-        <mxCell id="12" value="Avis" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="500" y="240" width="120" height="80" as="geometry" />
+        <!-- Table Paiement -->
+        <mxCell id="22" value="Paiement" style="swimlane;fillColor=#E1D5E7;strokeColor=#000000;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="620" y="60" width="220" height="260" as="geometry" />
         </mxCell>
-        <mxCell id="13" value="id&#xa;commentaire&#xa;note&#xa;date_creation" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="12">
-          <mxGeometry x="0" y="0" width="120" height="80" as="geometry" />
+        <mxCell id="23" value="id: PK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="22">
+          <mxGeometry y="40" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="transaction_id: UNIQUE" style="fontSize=12;fontColor=#000000;" vertex="1" parent="22">
+          <mxGeometry y="70" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="commande_id: FK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="22">
+          <mxGeometry y="100" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="26" value="montant" style="fontSize=12;fontColor=#000000;" vertex="1" parent="22">
+          <mxGeometry y="130" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="27" value="statut" style="fontSize=12;fontColor=#000000;" vertex="1" parent="22">
+          <mxGeometry y="160" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="28" value="date_creation" style="fontSize=12;fontColor=#000000;" vertex="1" parent="22">
+          <mxGeometry y="190" width="220" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Table Pokedex -->
+        <mxCell id="29" value="Pokedex" style="swimlane;fillColor=#F8CECC;strokeColor=#000000;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="320" y="420" width="240" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="30" value="id: PK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="40" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="31" value="nom" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="70" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="32" value="type_1" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="100" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="33" value="type_2" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="130" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="34" value="generation" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="160" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="35" value="legendaire" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="190" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="36" value="prix" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="220" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="37" value="discount" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="250" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="38" value="image" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="280" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="39" value="quantite" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="310" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="40" value="description" style="fontSize=12;fontColor=#000000;" vertex="1" parent="29">
+          <mxGeometry y="340" width="240" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Table CommandeProduit -->
+        <mxCell id="41" value="CommandeProduit" style="swimlane;fillColor=#DAE8FC;strokeColor=#000000;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="620" y="420" width="220" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="42" value="id: PK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="41">
+          <mxGeometry y="40" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="43" value="commande_id: FK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="41">
+          <mxGeometry y="70" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="44" value="produit_id: FK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="41">
+          <mxGeometry y="100" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="45" value="quantite" style="fontSize=12;fontColor=#000000;" vertex="1" parent="41">
+          <mxGeometry y="130" width="220" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Table Avis -->
+        <mxCell id="46" value="Avis" style="swimlane;fillColor=#D5E8D4;strokeColor=#000000;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="60" y="420" width="220" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="47" value="id: PK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="46">
+          <mxGeometry y="40" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="48" value="utilisateur_id: FK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="46">
+          <mxGeometry y="70" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="49" value="produit_id: FK" style="fontSize=12;fontColor=#000000;" vertex="1" parent="46">
+          <mxGeometry y="100" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="50" value="note" style="fontSize=12;fontColor=#000000;" vertex="1" parent="46">
+          <mxGeometry y="130" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="51" value="commentaire" style="fontSize=12;fontColor=#000000;" vertex="1" parent="46">
+          <mxGeometry y="160" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="52" value="date_creation" style="fontSize=12;fontColor=#000000;" vertex="1" parent="46">
+          <mxGeometry y="190" width="220" height="30" as="geometry" />
         </mxCell>
 
         <!-- Relations -->
-        <mxCell id="14" value="Relation" edge="1" parent="1" source="2" target="6">
+        <mxCell id="53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;strokeColor=#000000;" edge="1" parent="1" source="11" target="2">
           <mxGeometry relative="1" as="geometry" />
+          <mxCell id="54" value="1,N" style="fontSize=12;fontColor=#000000;" edge="1" parent="53" />
         </mxCell>
-        <mxCell id="15" value="Relation" edge="1" parent="1" source="6" target="8">
+        <mxCell id="55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;strokeColor=#000000;" edge="1" parent="1" source="22" target="11">
           <mxGeometry relative="1" as="geometry" />
+          <mxCell id="56" value="1,1" style="fontSize=12;fontColor=#000000;" edge="1" parent="55" />
         </mxCell>
-        <mxCell id="16" value="Relation" edge="1" parent="1" source="4" target="8">
+        <mxCell id="57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;strokeColor=#000000;" edge="1" parent="1" source="11" target="41">
           <mxGeometry relative="1" as="geometry" />
+          <mxCell id="58" value="1,N" style="fontSize=12;fontColor=#000000;" edge="1" parent="57" />
         </mxCell>
-        <mxCell id="17" value="Relation" edge="1" parent="1" source="6" target="10">
+        <mxCell id="59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;strokeColor=#000000;" edge="1" parent="1" source="29" target="41">
           <mxGeometry relative="1" as="geometry" />
+          <mxCell id="60" value="1,N" style="fontSize=12;fontColor=#000000;" edge="1" parent="59" />
         </mxCell>
-        <mxCell id="18" value="Relation" edge="1" parent="1" source="4" target="12">
+        <mxCell id="61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;strokeColor=#000000;" edge="1" parent="1" source="46" target="2">
           <mxGeometry relative="1" as="geometry" />
+          <mxCell id="62" value="1,N" style="fontSize=12;fontColor=#000000;" edge="1" parent="61" />
+        </mxCell>
+        <mxCell id="63" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;strokeColor=#000000;" edge="1" parent="1" source="46" target="29">
+          <mxGeometry relative="1" as="geometry" />
+          <mxCell id="64" value="1,N" style="fontSize=12;fontColor=#000000;" edge="1" parent="63" />
         </mxCell>
       </root>
     </mxGraphModel>

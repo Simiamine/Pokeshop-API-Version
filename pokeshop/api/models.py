@@ -89,12 +89,6 @@ class Commande(models.Model):
         ('ANNULEE', 'Annulée'),
     ]
 
-    STATUT_LIVRAISON_CHOICES = [
-        ('EN_ATTENTE', 'En attente'),
-        ('EN_COURS', 'En cours'),
-        ('LIVREE', 'Livrée'),
-        ('ECHOUÉE', 'Échouée')
-    ]
 
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     adresse_livraison = models.CharField(max_length=150)  # Réduction à 150 caractères
@@ -105,7 +99,6 @@ class Commande(models.Model):
     numero_commande = models.CharField(max_length=100, db_index=False)  # Désactiver l'indexation automatique
     date_creation = models.DateTimeField(auto_now_add=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='EN_TRAITEMENT')
-    statut_livraison = models.CharField(max_length=20, choices=STATUT_LIVRAISON_CHOICES, default='EN_ATTENTE')  # Ajouté pour la gestion des livraisons
 
     def __str__(self):
         return f"Commande {self.numero_commande} de {self.utilisateur.prenom}"
