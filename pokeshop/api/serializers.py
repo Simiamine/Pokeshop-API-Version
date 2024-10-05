@@ -12,14 +12,14 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         return make_password(value)
 
 class CommandeProduitSerializer(serializers.ModelSerializer):
-    produit_nom = serializers.ReadOnlyField(source='produit.nom')  # Afficher le nom du produit
+    produit = serializers.PrimaryKeyRelatedField(queryset=Pokedex.objects.all())  # Utilise l'ID du produit
 
     class Meta:
         model = CommandeProduit
-        fields = ['produit_nom', 'quantite']  # Affiche le nom du produit et la quantité
+        fields = ['produit', 'quantite']  # Utilise l'ID du produit et la quantité
 
 class CommandeSerializer(serializers.ModelSerializer):
-    details = CommandeProduitSerializer(many=True)  # Utilisation du serializer des détails
+    details = CommandeProduitSerializer(many=True)
 
     class Meta:
         model = Commande
@@ -34,12 +34,11 @@ class CommandeSerializer(serializers.ModelSerializer):
 
         # Ajouter les détails de la commande (produits et quantités)
         for detail in details_data:
-            produit = detail.get('produit')
-            quantite = detail.get('quantite', 1)  # Quantité par défaut à 1
+            produit = detail.get('produit')  # Produit est maintenant un objet Pokedex
+            quantite = detail.get('quantite', 1)
 
-            if produit and quantite:
-                # Crée l'entrée CommandeProduit
-                CommandeProduit.objects.create(commande=commande, produit=produit, quantite=quantite)
+            # Crée l'entrée CommandeProduit
+            CommandeProduit.objects.create(commande=commande, produit=produit, quantite=quantite)
 
         return commande
 
