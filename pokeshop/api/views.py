@@ -2,6 +2,7 @@ import stripe
 from django.contrib.auth import authenticate
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
+from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from rest_framework import viewsets, status
@@ -91,12 +92,54 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
 
 # Vue pour enregistrer un utilisateur
 class UserRegisterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        serializer = UtilisateurSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Log pour vérifier que la requête est reçue
+        print("Requête POST reçue pour l'inscription.")
+
+        # Récupération des données depuis la requête
+        prenom = request.data.get('prenom')
+        nom = request.data.get('nom')
+        email = request.data.get('email')
+        telephone = request.data.get('telephone', "")
+        date_naissance = request.data.get('date_naissance', None)
+        password = request.data.get('password')
+        password2 = request.data.get('password2', password)  # Prend en charge une confirmation de mot de passe
+
+        # Vérification des données
+        if not all([prenom, nom, email, password]):
+            print("Erreur : Tous les champs doivent être remplis.")
+            return Response({"error": "Tous les champs doivent être remplis."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if password != password2:
+            print("Erreur : Les mots de passe ne correspondent pas.")
+            return Response({"password": -3}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Vérifier si l'email existe déjà
+        if Utilisateur.objects.filter(email=email).exists():
+            print("Erreur : Un utilisateur avec cet email existe déjà.")
+            return Response({"email": -10}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Création de l'utilisateur avec le mot de passe hashé
+        utilisateur = Utilisateur(
+            prenom=prenom,
+            nom=nom,
+            email=email,
+            telephone=telephone,
+            date_naissance=date_naissance,
+            password=make_password(password),  # Hash du mot de passe
+        )
+        utilisateur.save()
+
+        # Générer un token JWT pour l'utilisateur
+        refresh = RefreshToken.for_user(utilisateur)
+
+        return Response({
+            'user_id': utilisateur.id,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        }, status=status.HTTP_201_CREATED)
     
 # Vue pour modifier ou supprimer un utilisateur
 class UserUpdateDeleteView(APIView):
@@ -311,7 +354,7 @@ class AvisViewSet(viewsets.ModelViewSet):
         avis.delete()
         return Response({"message": "Avis supprimé avec succès"}, status=status.HTTP_204_NO_CONTENT)
     
-class LoginView(APIView):
+class LoginView(APIView): 
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -323,6 +366,7 @@ class LoginView(APIView):
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'user_id': utilisateur.id,  # Ajout de l'ID utilisateur à la réponse
             })
         else:
             return Response({"error": "Email ou mot de passe incorrect"}, status=status.HTTP_401_UNAUTHORIZED)

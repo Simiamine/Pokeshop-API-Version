@@ -46,7 +46,6 @@ function mailMdp(){  // Fonction changer mdp
   });
 }
 
-// Fonction pour gérer la connexion
 function connex() {
   $('input').removeClass('input_erreur');
 
@@ -54,246 +53,155 @@ function connex() {
   var mdp = $("#mdp").val();
 
   if (email === '' || mdp === '') {
-    $("#rep_connexion").html("Veuillez remplir tous les champs");
-    $("#rep_connexion").addClass("alert-rouge");
-    return false;
+      $("#rep_connexion").html("Veuillez remplir tous les champs");
+      $("#rep_connexion").addClass("alert-rouge");
+      return false;
   }
 
   var donnee = {
-    email: email,
-    password: mdp,
+      email: email,
+      password: mdp
   };
 
   // Envoi de la requête pour obtenir les tokens et l'ID utilisateur
   $.ajax({
-    type: "POST",
-    url: "http://127.0.0.1:8000/api/auth/login/",
-    data: JSON.stringify(donnee),
-    contentType: "application/json",
-    dataType: "json",
+      type: "POST",
+      url: "http://127.0.0.1:8000/api/auth/login/",
+      data: JSON.stringify(donnee),
+      contentType: "application/json",
+      dataType: "json",
 
-    success: function(response) {
-      if (response.access && response.refresh) {
-        // Stocker les tokens et le statut dans localStorage
-        localStorage.setItem('access_token', response.access);
-        localStorage.setItem('refresh_token', response.refresh);
-        localStorage.setItem('user_statut', response.statut);  // Stocker le rôle utilisateur
+      success: function(response) {
+          if (response.access && response.refresh && response.user_id) {
+              // Stocker les tokens dans localStorage
+              localStorage.setItem('access_token', response.access);
+              localStorage.setItem('refresh_token', response.refresh);
 
-        // Rediriger en fonction du rôle de l'utilisateur
-        if (response.statut === 'admin') {
-          window.location.href = "../admin/dashboard.php";  // Redirection admin
-        } else if (response.statut === 'client') {
-          window.location.href = "../client/compte_client.php";  // Redirection client
-        } else {
-          $("#rep_connexion").html("Rôle utilisateur inconnu.");
-          $("#rep_connexion").addClass("alert-rouge");
-        }
-      } else {
-        $("#rep_connexion").html("Erreur lors de la connexion");
-        $("#rep_connexion").addClass("alert-rouge");
+              // Utilisation de l'ID utilisateur pour récupérer ses informations
+              $.ajax({
+                  type: "GET",
+                  url: "http://127.0.0.1:8000/api/utilisateurs/" + response.user_id + "/",  // Utilisation de l'ID utilisateur retourné
+                  headers: {
+                      'Authorization': 'Bearer ' + response.access  // Utilisation du token d'accès
+                  },
+                  success: function(userInfo) {
+                      // Envoi des informations utilisateur à setSession.php pour les stocker en session PHP
+                      $.ajax({
+                          type: "POST",
+                          url: "setSession.php",
+                          data: {
+                              prenom: userInfo.prenom,
+                              nom: userInfo.nom,
+                              email: userInfo.email,
+                              statut: userInfo.statut,  // Statut de l'utilisateur
+                              access_token: response.access,  // On envoie l'access token
+                              user_id: response.user_id       // On envoie aussi l'ID utilisateur
+                          },
+                          success: function() {
+                              window.location.href = "../index.php"; // Redirection après connexion
+                          },
+                          error: function() {
+                              $("#rep_connexion").html("Erreur lors de la connexion.");
+                              $("#rep_connexion").addClass("alert-rouge");
+                          }
+                      });
+                  },
+                  error: function() {
+                      $("#rep_connexion").html("Erreur lors de la récupération des informations.");
+                      $("#rep_connexion").addClass("alert-rouge");
+                  }
+              });
+          } else {
+              $("#rep_connexion").html("Erreur lors de la connexion");
+              $("#rep_connexion").addClass("alert-rouge");
+          }
+      },
+
+      error: function(xhr, status, error) {
+          if (xhr.status == 401) {
+              $("#rep_connexion").html("Email ou mot de passe incorrect");
+              $("#rep_connexion").addClass("alert-rouge");
+          } else {
+              $("#rep_connexion").html("Erreur lors de la connexion");
+              $("#rep_connexion").addClass("alert-rouge");
+          }
       }
-    },
-
-    error: function(xhr, status, error) {
-      if (xhr.status == 401) {
-        $("#rep_connexion").html("Email ou mot de passe incorrect");
-        $("#rep_connexion").addClass("alert-rouge");
-      } else {
-        $("#rep_connexion").html("Erreur lors de la connexion");
-        $("#rep_connexion").addClass("alert-rouge");
-      }
-    }
   });
 
   return false;
 }
 
 
+function inscript() {
+  console.log("La fonction inscript() est appelée");
 
+  // Récupération des données depuis les champs du formulaire
+  var prenom = $("#prenom").val();
+  var nom = $("#nom").val();
+  var email = $("#email").val();
+  var password = $("#mdp1").val();
 
+  // Vérification des champs vides pour afficher une erreur s'ils ne sont pas remplis
+  if (prenom === '' || nom === '' || email === '' || password === '') {
+      $("#rep_inscription").html("Veuillez remplir tous les champs.");
+      $("#rep_inscription").addClass("alert-rouge");
+      return;
+  }
 
+  // Préparation des données pour l'envoi à l'API
+  var donnee = {
+      prenom: prenom,
+      nom: nom,
+      email: email,
+      password: password
+  };
 
-function inscript(){  // Fonction inscription
-    // On retire la classe de clignottement d'input erreur dans chaque input
-    $('input').removeClass('input_erreur');
-    
-    // Recuperation des donnees 
-    var prenom = $("#prenom").val();
-    var nom = $("#nom").val();
-    var email = $("#email").val();
-    var tel = $("#tel").val();
-    var dateNaiss = $("#dateNaiss").val();
-    var mdp1 = $("#mdp1").val();
-    var mdp2 = $("#mdp2").val();
+  console.log("Données préparées pour l'envoi : ", donnee);
 
-    // Formater la date en format français
-    if(dateNaiss != ""){
-        var dateObj = new Date(dateNaiss);
-        var options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-        var dateNaiss = dateObj.toLocaleDateString('fr-FR', options);
-    }
-    // Prépare les données pour l'envoi à la page PHP sous forme d'objet JavaScript
-    var donnee = {
-        prenom : prenom,
-        nom : nom,
-        email : email,
-        tel : tel,
-        dateNaiss : dateNaiss,
-        mdp1 : mdp1,
-        mdp2 : mdp2,
-    };
-    // Envoi de la requête AJAX avec jQuer y
-    $.ajax({
-        type: "POST", // Méthode HTTP POST
-        url: "verifUser.php", // URL de la page PHP de traitement
-        data: donnee, // Données à envoyer
-        dataType: "json", // Type de données attendu en réponse (HTML dans ce cas)
+  // Envoi de la requête AJAX avec jQuery
+  $.ajax({
+      type: "POST", // Méthode HTTP POST
+      url: "http://127.0.0.1:8000/api/inscription/", // URL de l'API d'inscription
+      data: JSON.stringify(donnee), // Convertir les données en JSON pour l'envoi
+      contentType: "application/json", // Spécifier que les données sont en JSON
+      dataType: "json", // Type de données attendu en réponse (JSON)
 
-        success: function(response) {
-          
-            $('#rep_inscription').empty();  // clear la div reponse
-            $('#rep_inscription').removeClass()  // Enleve toute les class
-            // Fonction appelée en cas de succès de l'envoi de la requete
-            var error = -999;
+      beforeSend: function() {
+          console.log("Envoi de la requête AJAX...");
+      },
 
-            $.each(response, function(cle, val){
-              if(val == 0){
-                $("#rep_inscription").html("Veuillez remplir les champs en surbrillance");
-                $("#rep_inscription").addClass("alert-rouge");
-                error = 0;  // erreur de type 0, cad champs non rempli
-                switch (cle) {
-                  case 'prenom':
-                    $('#prenom').addClass('input_erreur');
-                    break;
-                  case 'nom':
-                    $('#nom').addClass('input_erreur');
-                    break;
-                  case 'email':
-                    $('#email').addClass('input_erreur');
-                    break;
-                  case 'telephone':
-                    $('#tel').addClass('input_erreur');
-                    break;
-                  case 'dateNaissance':
-                    $('#dateNaiss').addClass('input_erreur');
-                    break;
-                  case 'mdp':
-                    $('#mdp1').addClass('input_erreur');
-                    $('#mdp2').addClass('input_erreur');
-                    break;
-                  default:
-                    break;
-                }
-              }
-            });
-            if(error == -999){
-              $.each(response, function(cle, val){
-                if(val == -1){
-                  $("#rep_inscription").html("Les champs en surbrillance sont invalide");
-                  $("#rep_inscription").addClass("alert-rouge");
-                  error = -1;  // erreur de type -1, cad champs invalide
-                  switch (cle) {
-                    case 'prenom':
-                      $('#prenom').addClass('input_erreur');
-                      break;
-                    case 'nom':
-                      $('#nom').addClass('input_erreur');
-                      break;
-                    case 'email':
-                      $('#email').addClass('input_erreur');
-                      break;
-                    case 'telephone':
-                      $('#tel').addClass('input_erreur');
-                      break;
-                    case 'dateNaissance':
-                      $('#dateNaiss').addClass('input_erreur');
-                      break;
-                    default:
-                      break;
-                  }
-                }
-              });
-            }
-            if(error == -999){
-              // Erreur champ mdp vide :
-              if(response['mdp'] == -2){
-                $("#rep_inscription").append("Veuillez vérifier votre mot de passe");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp2').addClass('input_erreur');
-                error = -2;
-              }
-              if(response['mdp'] == -4){
-                $("#rep_inscription").append("Veuillez inscrire un mot de passe");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp1').addClass('input_erreur');
-                error = -4;
-              }
-              // erreur mdp different
-              if(response['mdp'] == -3){
-                $("#rep_inscription").append("Les mots de passe sont différents");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp1').addClass('input_erreur');
-                $('#mdp2').addClass('input_erreur');
-                error = -3;
-              }
-              if(response['mdp'] == -4){
-                $("#rep_inscription").append("Veuillez inscrire un mot de passe");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp1').addClass('input_erreur');
-                error = -4;
-              }
-              if(response['mdp'] == -5){  // - 7 caractères
-                $("#rep_inscription").append("Le mot de passe est trop court");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp1').addClass('input_erreur');
-                error = -5;
-              }
-              if(response['mdp'] == -6){  // Pas de chiffre
-                $("#rep_inscription").append("Le mot de passe doit contenir 1 chiffre");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp1').addClass('input_erreur');
-                error = -6;
-              }
-              if(response['mdp'] == -7){  // Pas de maj
-                $("#rep_inscription").append("Le mot de passe doit contenir une majuscule");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp1').addClass('input_erreur');
-                error = -7;
-              }
-              if(response['mdp'] == -8){  // Pas de minuscule
-                $("#rep_inscription").append("Le mot de passe doit contenir une majuscule");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp1').addClass('input_erreur');
-                error = -8;
-              }
-              if(response['mdp'] == -9){
-                $("#rep_inscription").append("Le mot de passe doit contenir un caractère spécial");
-                $("#rep_inscription").addClass("alert-rouge");
-                $('#mdp1').addClass('input_erreur');
-                error = -9;
-              }
-              // Erreur mail deja existant
-              if(response['email'] == -10){
-                $("#rep_inscription").append("Il existe déjà un compte avec cet email");
-                $("#rep_inscription").addClass("alert-orange");
-                $('#email').addClass('input_erreur');
-                error = -10;
-              }    
-            }// S'il y a aucune erreur
-            if(error == -999){
-              $("#rep_inscription").html("Bienvenue parmi nous dresseur Pokemon !");
-              $("#rep_inscription").addClass("alert-vert");
-            }
-            console.log(response);
-        },
+      success: function(response) {
+          console.log("Réponse reçue : ", response);
+          $('#rep_inscription').empty();  
+          $('#rep_inscription').removeClass();
 
-        error: function(xhr, status, error) {
-            // Fonction appelée en cas d'erreur
-            console.error("Erreur: " + error);
-            console.error("Status: " + status);
-        }
-    });
+          // Logique de succès : Afficher un message de bienvenue
+          $("#rep_inscription").html("Bienvenue parmi nous, dresseur Pokemon !");
+          $("#rep_inscription").addClass("alert-vert");
+      },
+
+      error: function(xhr, status, error) {
+          console.error("Erreur AJAX: " + error);
+          console.error("Status: " + status);
+          console.error("Réponse serveur : ", xhr.responseText);
+
+          // Affichage des erreurs à l'utilisateur
+          if (xhr.status === 400) {
+              $("#rep_inscription").html("Erreur lors de l'inscription. Veuillez vérifier les informations fournies.");
+              $("#rep_inscription").addClass("alert-rouge");
+          } else if (xhr.status === 500) {
+              $("#rep_inscription").html("Erreur interne du serveur. Veuillez réessayer plus tard.");
+              $("#rep_inscription").addClass("alert-rouge");
+          } else {
+              $("#rep_inscription").html("Erreur inattendue. Veuillez réessayer.");
+              $("#rep_inscription").addClass("alert-rouge");
+          }
+      }
+  });
 }
+
+
+
 
 function toggleSignup(){
     document.getElementById("login-toggle").style.backgroundColor="#fff";

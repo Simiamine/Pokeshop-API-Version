@@ -9,7 +9,7 @@ $path = "/".basename(dirname(dirname(__FILE__)));  // Permet d'obtenir le nom du
     <div>   
         <ul id="navbar" style="display: flex;"> <!-- Ajout du style pour réduire l'espacement -->
             <?php if (isset($_SESSION['user_statut']) && $_SESSION['user_statut'] == 'client'){ ?>
-            <li>Bonjour, <?= htmlspecialchars($_SESSION['user_name']); ?></li>
+            <li>Bonjour, <?= htmlspecialchars($_SESSION['user_prenom']); ?></li>
             
             <li><a href="<?php echo $path."/index.php";?>" id="menu" class="ligne-header">Menu</a></li>
             <li><a href="<?php echo $path."/php/catalogue.php";?>" id="catalogue" class="ligne-header">Catalogue</a></li>
