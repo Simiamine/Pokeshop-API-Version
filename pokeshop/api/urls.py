@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from django.urls import path, include
-from .views import UtilisateurViewSet, CommandeViewSet, PokedexViewSet, UserRegisterView, AvisViewSet, UserUpdateDeleteView, PaiementView, StatutPaiementView, stripe_webhook, LoginView
+from .views import UtilisateurViewSet, CommandeViewSet, PokedexViewSet, UserRegisterView, AvisViewSet, UserUpdateDeleteView, PaiementView, StatutPaiementView, stripe_webhook, LoginView, RecommendationView
 
 router = DefaultRouter()
 router.register(r'utilisateurs', UtilisateurViewSet)
@@ -12,14 +12,11 @@ router.register(r'commandes', CommandeViewSet)
 router.register(r'pokedex', PokedexViewSet)
 router.register(r'avis', AvisViewSet)
 
-# Ajout des routes spécifiques pour les utilisateurs
 urlpatterns = router.urls
 urlpatterns += [
     path('utilisateurs/<int:pk>/profil/', UtilisateurViewSet.as_view({'get': 'profil'}), name='utilisateur-profil'),
     path('utilisateurs/<int:pk>/commandes/', UtilisateurViewSet.as_view({'get': 'commandes'}), name='utilisateur-commandes'),
     path('inscription/', UserRegisterView.as_view(), name='inscription'),
-    path('utilisateurs/<int:pk>/modifier/', UserUpdateDeleteView.as_view(), name='modifier-utilisateur'),
-    path('utilisateurs/<int:pk>/supprimer/', UserUpdateDeleteView.as_view(), name='supprimer-utilisateur'),
     path('commandes/<int:pk>/suivi-livraison/', CommandeViewSet.as_view({'get': 'suivi_livraison'}), name='suivi-livraison'),
     path('commandes/<int:pk>/update-livraison/', CommandeViewSet.as_view({'patch': 'update_livraison'}), name='update-livraison'),
     path('paiements/traiter/', PaiementView.as_view(), name='paiement-traiter'),
@@ -29,7 +26,8 @@ urlpatterns += [
     path('produits/<int:pk>/ajouter-avis/', AvisViewSet.as_view({'post': 'ajouter_avis'}), name='ajouter-avis'),
     path('avis/<int:pk>/supprimer-avis/', AvisViewSet.as_view({'delete': 'supprimer_avis'}), name='supprimer-avis'),
     path('auth/login/', LoginView.as_view(), name='login'),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('recommandations/', RecommendationView.as_view(), name='recommandations'),
 
 ]

@@ -11,8 +11,11 @@ from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import Utilisateur, Commande, Pokedex, Paiement, Avis
+from django.db.models import Count, Q, Sum
+from rest_framework.decorators import api_view
+from .models import Utilisateur, Commande, Pokedex, Paiement, Avis, CommandeProduit
 from .serializers import UtilisateurSerializer, CommandeSerializer, PokedexSerializer, PaiementSerializer, AvisSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 # Suivi et mise à jour du statut via Webhooks
 
@@ -83,6 +86,8 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
         commandes = Commande.objects.filter(utilisateur=utilisateur)
         serializer = CommandeSerializer(commandes, many=True)
         return Response(serializer.data)
+    
+    
 
 # Vue pour enregistrer un utilisateur
 class UserRegisterView(APIView):
@@ -274,14 +279,14 @@ class AvisViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(avis, many=True)
         return Response(serializer.data)
 
-    # Ajouter un avis pour un produit
-    @action(detail=True, methods=['post'], url_path='ajouter-avis')
+
+    @action(detail=True, methods=['post'], url_path='ajouter-avis', permission_classes=[IsAuthenticated])
     def ajouter_avis(self, request, pk=None):
         produit = get_object_or_404(Pokedex, pk=pk)
-        utilisateur = request.user  # Assurez-vous que l'utilisateur est authentifié
+        utilisateur = request.user  # L'utilisateur authentifié est accessible ici
 
-        # Vérifier si l'utilisateur a acheté le produit
-        if not Commande.objects.filter(utilisateur=utilisateur, produits=produit).exists():
+        # Vérifier si l'utilisateur a acheté le produit via le modèle CommandeProduit
+        if not CommandeProduit.objects.filter(commande__utilisateur=utilisateur, produit=produit).exists():
             return Response({"error": "Vous devez acheter ce produit pour laisser un avis"}, status=status.HTTP_403_FORBIDDEN)
         
         note = request.data.get('note')
@@ -321,3 +326,59 @@ class LoginView(APIView):
             })
         else:
             return Response({"error": "Email ou mot de passe incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+# Ici on va implémenter des methodes pour recommender des pokemons
+
+class RecommendationView(APIView):
+    # Autoriser l'accès en lecture seule (GET) pour tout le monde
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_pokemon_most_sold(self, limit=3):
+        return Pokedex.objects.annotate(total_sold=Sum('commandeproduit__quantite')).order_by('-total_sold')[:limit]
+
+    def get_personalized_recommendations(utilisateur, limit=3):
+        # Récupérer les Pokémon achetés par l'utilisateur
+        user_pokemons = CommandeProduit.objects.filter(commande__utilisateur=utilisateur).values_list('produit', flat=True)
+
+        # Si l'utilisateur n'a pas acheté de Pokémon, on retourne les plus vendus
+        if not user_pokemons.exists():
+            return Pokedex.objects.annotate(total_sold=Sum('commandeproduit__quantite')).order_by('-total_sold')[:limit]
+
+        # Liste de tous les types de Pokémon que l'utilisateur a déjà achetés (on aplatit la liste)
+        user_pokemon_types = Pokedex.objects.filter(id__in=user_pokemons).values_list('type_1', flat=True)
+
+        # Trouver les autres utilisateurs ayant acheté ces mêmes Pokémon
+        other_users = CommandeProduit.objects.filter(produit__in=user_pokemons).exclude(commande__utilisateur=utilisateur).values('commande__utilisateur').distinct()
+
+        # Récupérer les Pokémon achetés par ces autres utilisateurs, exclure les Pokémon déjà achetés par l'utilisateur
+        pokemon_recommendations = CommandeProduit.objects.filter(
+            Q(commande__utilisateur__in=other_users) |  # Pokémon achetés par d'autres utilisateurs similaires
+            Q(produit__type_1__in=user_pokemon_types) |  # Pokémon du même type que ceux achetés par l'utilisateur
+            Q(produit__type_2__in=user_pokemon_types)
+        ).exclude(produit__in=user_pokemons).values('produit') \
+            .annotate(total_sold=Sum('quantite')) \
+            .order_by('-total_sold')[:limit]
+
+        # Ajouter une logique pour les nouveaux produits ou ceux en réduction
+        recent_pokemons = Pokedex.objects.filter().order_by('-generation')[:limit]  # Les plus récents
+        discounted_pokemons = Pokedex.objects.filter(discount__gt=0).order_by('-discount')[:limit]  # Les Pokémon en réduction
+
+        # Mélanger les recommandations
+        recommendations = list(set([p['produit'] for p in pokemon_recommendations] + list(recent_pokemons) + list(discounted_pokemons)))
+
+        # Limiter le nombre de recommandations finales
+        pokemon_list = Pokedex.objects.filter(id__in=recommendations)[:limit]
+
+        return pokemon_list
+
+    def get(self, request, *args, **kwargs):
+        utilisateur = request.user  # Utilise request.user pour récupérer l'utilisateur connecté
+        
+        # Vérifie si l'utilisateur est authentifié
+        if utilisateur.is_authenticated:
+            personalized_recommendations = self.get_personalized_recommendations(utilisateur)
+            return Response({'recommendations': PokedexSerializer(personalized_recommendations, many=True).data})
+        
+        # Si l'utilisateur n'est pas connecté, on retourne les Pokémon les plus vendus
+        popular_pokemons = self.get_pokemon_most_sold()
+        return Response({'recommendations': PokedexSerializer(popular_pokemons, many=True).data})
