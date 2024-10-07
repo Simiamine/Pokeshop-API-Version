@@ -52,6 +52,7 @@
         <option value="Fée">Fée</option>
     </select>
 
+    </select>
     <select id="legendaire-filter" class="filter-select">
         <option value="">Légendaire/Non légendaire</option>
         <option value="Oui">Légendaire</option>
@@ -112,21 +113,16 @@ if(curl_errno($curl)) {
         // Utilisation d'un dégradé si le Pokémon a deux types
         $bg_gradient = ($pokemon['type_2']) ? "background: linear-gradient(135deg, $bg_color_1, $bg_color_2);" : "background-color: $bg_color_1;";
 
-        // Vérifier si la clé 'légendaire' existe avant de l'utiliser
-        $legendaire = isset($pokemon['légendaire']) ? $pokemon['légendaire'] : 'Non défini';
-
         // Vérifier si la clé 'quantité' existe avant de l'utiliser
-        $quantite = isset($pokemon['quantité']) ? $pokemon['quantité'] : 'Non défini';
+        $quantite = isset($pokemon['quantite']) ? $pokemon['quantite'] : 'Non défini';
 ?>
-<div class="card" style="width: 18rem; <?php echo $bg_gradient; ?>"
+<div class="card" style="width: 18rem; <?php echo $bg_gradient; ?>;"
     data-id="<?php echo $pokemon['id']; ?>" 
     data-name="<?php echo $pokemon['nom']; ?>" 
     data-image="../img/<?php echo $pokemon['image']; ?>" 
     data-description="<?php echo $pokemon['description']; ?>"
     data-type="<?php echo $pokemon['type_1']; ?>"
     data-type2="<?php echo $pokemon['type_2']; ?>"
-    data-generation="<?php echo $pokemon['generation']; ?>"
-    data-legendaire="<?php echo $legendaire; ?>"  
     data-quantite="<?php echo $quantite; ?>"   
 >
     <div class="card-img-top-container">
@@ -180,8 +176,6 @@ curl_close($curl);
             <div class="popup-text-content">
                 <h3 id="pokemonName"></h3>
                 <div>Pokémon ID: <span id="pokemonID"></span></div>
-                <div><strong>Génération : </strong><span id="generation" class="pokemon-generation"></span></div>
-                <div><strong>Légendaire : </strong><span id="legendaire" class="pokemon-legendaire"></span></div>
                 <div><strong>Description : </strong><span id="pokemonDescription"></span></div>
                 <div><strong>Prix Initial : </strong><span id="initialPrice" class="pokemon-price"></span></div>
                 <div><strong>Prix après Remise : </strong><span id="discountedPrice" class="pokemon-discounted-price"></span></div>
@@ -193,47 +187,7 @@ curl_close($curl);
 </div>
 
 <script>
-// Barre de recherche et filtres
-document.addEventListener("DOMContentLoaded", function() {
-    const searchInput = document.getElementById('search-input');
-    const typeFilter = document.getElementById('type-filter');
-    const legendaireFilter = document.getElementById('legendaire-filter');
-    const cards = document.querySelectorAll('.card');
-    const noResultsDiv = document.getElementById('no-results');
-
-    function filterCards() {
-        const searchText = searchInput.value.toLowerCase();
-        const selectedType = typeFilter.value.toLowerCase();
-        const selectedLegendaire = legendaireFilter.value.toLowerCase();
-        let found = false;
-
-        cards.forEach(card => {
-            const name = card.getAttribute('data-name').toLowerCase();
-            const type1 = card.getAttribute('data-type').toLowerCase();
-            const type2 = card.getAttribute('data-type2').toLowerCase();
-            const legendaire = card.getAttribute('data-legendaire').toLowerCase();
-
-            const matchesSearch = name.startsWith(searchText);
-            const matchesType = selectedType === '' || type1 === selectedType || type2 === selectedType;
-            const matchesLegendaire = selectedLegendaire === '' || legendaire === selectedLegendaire;
-
-            if (matchesSearch && matchesType && matchesLegendaire) {
-                card.style.display = '';
-                found = true;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        noResultsDiv ? noResultsDiv.style.display = found ? 'none' : 'block' : null;
-    }
-
-    searchInput.addEventListener('input', filterCards);
-    typeFilter.addEventListener('change', filterCards);
-    legendaireFilter.addEventListener('change', filterCards);
-});
-
-// Gestion de la pop-up
+// Gestion de la pop-up et de la validation de quantité disponible
 document.addEventListener("DOMContentLoaded", function() {
     const cards = document.querySelectorAll('.card');
     const popup = document.getElementById('pokemonPopup');
@@ -243,24 +197,32 @@ document.addEventListener("DOMContentLoaded", function() {
     const quantite = document.getElementById('quantite');
     const closePopup = document.querySelector('.popup .close');
     const popupId = document.getElementById('pokemonID');
+    const addToCartButton = document.querySelector('.button-ajouter');
 
-    function openPopup(id, name, image, description, generation, legendaire, quantite, price, discountedPrice) {
+    // Ajout d'un compteur pour suivre les produits déjà ajoutés au panier
+    let panierQuantite = {};
+
+    function openPopup(id, name, image, description, quantite, price, discountedPrice) {
         popupId.textContent = id;
         popupName.textContent = name;
         popupImage.src = image;
         popupDescription.textContent = description;
-        document.getElementById('generation').textContent = generation;
-        document.getElementById('legendaire').textContent = legendaire === '1' ? 'Oui' : 'Non';
 
-        if (quantite <= 0) {
+        const quantiteDisponible = parseInt(quantite);
+
+        if (quantiteDisponible <= 0) {
             document.getElementById('quantite').innerHTML = "<span style='color: red; font-size: 1.5em;'>Victime de son succès</span>";
-            document.querySelector('.button-ajouter').style.display = 'none';
+            addToCartButton.style.display = 'none'; // Désactiver le bouton si la quantité est 0
         } else {
-            document.querySelector('.button-ajouter').style.display = 'block';
-            if (quantite < 5) {
-                document.getElementById('quantite').innerHTML = `<span style="font-size: 1.5em;">Attention, il ne reste plus que <span style="color: red;">${quantite}</span> Pokémon !</span>`;
+            const quantiteAjoutee = panierQuantite[id] || 0;
+
+            // Si la quantité ajoutée est égale à la quantité disponible, on empêche l'ajout
+            if (quantiteAjoutee >= quantiteDisponible) {
+                document.getElementById('quantite').innerHTML = `<span style="color: red; font-size: 1.5em;">Stock épuisé pour cet article</span>`;
+                addToCartButton.style.display = 'none';
             } else {
-                document.getElementById('quantite').textContent = '';
+                document.getElementById('quantite').innerHTML = `<span style="font-size: 1.5em;">Quantité disponible : <span style="color: green;">${quantiteDisponible - quantiteAjoutee}</span></span>`;
+                addToCartButton.style.display = 'block';
             }
         }
 
@@ -275,8 +237,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const name = this.getAttribute('data-name');
             const image = this.getAttribute('data-image');
             const description = this.getAttribute('data-description');
-            const generation = this.getAttribute('data-generation');
-            const legendaire = this.getAttribute('data-legendaire');
             const quantite = this.getAttribute('data-quantite');
             const priceElement = this.querySelector('.price') || this.querySelector('.original-price');
             const discountedPriceElement = this.querySelector('.discounted-price');
@@ -284,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const price = priceElement ? priceElement.textContent : 'N/A';
             const discountedPrice = discountedPriceElement ? discountedPriceElement.textContent : priceElement.textContent;
 
-            openPopup(id, name, image, description, generation, legendaire, quantite, price, discountedPrice);
+            openPopup(id, name, image, description, quantite, price, discountedPrice);
         });
     });
 
@@ -294,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Ajouter au panier
-    document.querySelector('.button-ajouter').addEventListener('click', function() {
+    addToCartButton.addEventListener('click', function() {
         const name = document.getElementById('pokemonName').textContent;
         const price = document.getElementById('initialPrice').textContent;
         const discountedPrice = document.getElementById('discountedPrice').textContent;
@@ -307,22 +267,33 @@ document.addEventListener("DOMContentLoaded", function() {
             pokemon_id: ID
         };
 
-        fetch('ajouter_au_panier.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(produit)
-        })
-        .then(response => response.text())
-        .then(data => {
-            console.log(data);
-        })
-        .catch(error => {
-            console.error('Erreur lors de l\'ajout au panier:', error);
-        });
+        const quantiteMax = parseInt(document.getElementById('quantite').textContent.split(': ')[1]);
+        panierQuantite[ID] = panierQuantite[ID] ? panierQuantite[ID] + 1 : 1;
 
-        alert("Votre Pokémon a été ajouté au panier");
+        // Empêche l'ajout au panier si la quantité dépasse le stock disponible
+        if (panierQuantite[ID] > quantiteMax) {
+            alert('Vous avez atteint la limite de stock disponible pour ce produit.');
+            panierQuantite[ID]--; // Réduire la quantité dans le compteur
+        } else {
+            fetch('ajouter_au_panier.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(produit)
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'ajout au panier:', error);
+            });
+
+            alert("Votre Pokémon a été ajouté au panier");
+        }
+
+        popup.style.display = 'none'; // Fermer la popup après l'ajout
         location.reload();
     });
 });

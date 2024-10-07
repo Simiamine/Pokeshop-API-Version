@@ -3,3 +3,4 @@ pokeshop/api/__pycache__/
 pokeshop/api/pokeshop/__pycache__/
 pokeshop/pokeshop/__pycache__
 pokeshop/__pycache__
+*.pyc
