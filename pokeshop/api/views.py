@@ -380,16 +380,17 @@ class RecommendationView(APIView):
     def get_pokemon_most_sold(self, limit=3):
         return Pokedex.objects.annotate(total_sold=Sum('commandeproduit__quantite')).order_by('-total_sold')[:limit]
 
-    def get_personalized_recommendations(utilisateur, limit=3):
-        # Récupérer les Pokémon achetés par l'utilisateur
-        user_pokemons = CommandeProduit.objects.filter(commande__utilisateur=utilisateur).values_list('produit', flat=True)
+    def get_personalized_recommendations(self, utilisateur, limit=3):
+        # Récupérer les identifiants des Pokémon achetés par l'utilisateur
+        user_pokemons = CommandeProduit.objects.filter(commande__utilisateur=utilisateur).values_list('produit_id', flat=True)
 
         # Si l'utilisateur n'a pas acheté de Pokémon, on retourne les plus vendus
         if not user_pokemons.exists():
             return Pokedex.objects.annotate(total_sold=Sum('commandeproduit__quantite')).order_by('-total_sold')[:limit]
 
-        # Liste de tous les types de Pokémon que l'utilisateur a déjà achetés (on aplatit la liste)
-        user_pokemon_types = Pokedex.objects.filter(id__in=user_pokemons).values_list('type_1', flat=True)
+        # Liste de tous les types de Pokémon que l'utilisateur a déjà achetés (on aplatie la liste)
+        user_pokemon_types = list(Pokedex.objects.filter(id__in=user_pokemons).values_list('type_1', flat=True)) + \
+                            list(Pokedex.objects.filter(id__in=user_pokemons).values_list('type_2', flat=True))
 
         # Trouver les autres utilisateurs ayant acheté ces mêmes Pokémon
         other_users = CommandeProduit.objects.filter(produit__in=user_pokemons).exclude(commande__utilisateur=utilisateur).values('commande__utilisateur').distinct()
@@ -399,30 +400,34 @@ class RecommendationView(APIView):
             Q(commande__utilisateur__in=other_users) |  # Pokémon achetés par d'autres utilisateurs similaires
             Q(produit__type_1__in=user_pokemon_types) |  # Pokémon du même type que ceux achetés par l'utilisateur
             Q(produit__type_2__in=user_pokemon_types)
-        ).exclude(produit__in=user_pokemons).values('produit') \
+        ).exclude(produit__in=user_pokemons).values_list('produit_id', flat=True) \
             .annotate(total_sold=Sum('quantite')) \
             .order_by('-total_sold')[:limit]
 
         # Ajouter une logique pour les nouveaux produits ou ceux en réduction
-        recent_pokemons = Pokedex.objects.filter().order_by('-generation')[:limit]  # Les plus récents
-        discounted_pokemons = Pokedex.objects.filter(discount__gt=0).order_by('-discount')[:limit]  # Les Pokémon en réduction
+        recent_pokemons = Pokedex.objects.order_by('-generation').values_list('id', flat=True)[:limit]
+        discounted_pokemons = Pokedex.objects.filter(discount__gt=0).order_by('-discount').values_list('id', flat=True)[:limit]
 
         # Mélanger les recommandations
-        recommendations = list(set([p['produit'] for p in pokemon_recommendations] + list(recent_pokemons) + list(discounted_pokemons)))
+        recommendations = list(set(list(pokemon_recommendations) + list(recent_pokemons) + list(discounted_pokemons)))
 
         # Limiter le nombre de recommandations finales
         pokemon_list = Pokedex.objects.filter(id__in=recommendations)[:limit]
 
         return pokemon_list
 
+    def get(self, request, pk, *args, **kwargs):
+        utilisateur = get_object_or_404(Utilisateur, pk=pk)
+        
+        # Si l'utilisateur a passé des commandes
+        personalized_recommendations = self.get_personalized_recommendations(utilisateur)
+        return Response({'recommendations': PokedexSerializer(personalized_recommendations, many=True).data})
+    
+class GlobalRecommendationView(APIView):
+    # Autoriser l'accès en lecture seule (GET) pour tout le monde
+    permission_classes = [AllowAny]
+
     def get(self, request, *args, **kwargs):
-        utilisateur = request.user  # Utilise request.user pour récupérer l'utilisateur connecté
-        
-        # Vérifie si l'utilisateur est authentifié
-        if utilisateur.is_authenticated:
-            personalized_recommendations = self.get_personalized_recommendations(utilisateur)
-            return Response({'recommendations': PokedexSerializer(personalized_recommendations, many=True).data})
-        
-        # Si l'utilisateur n'est pas connecté, on retourne les Pokémon les plus vendus
-        popular_pokemons = self.get_pokemon_most_sold()
+        # Récupérer les Pokémon les plus vendus
+        popular_pokemons = Pokedex.objects.annotate(total_sold=Sum('commandeproduit__quantite')).order_by('-total_sold')[:3]
         return Response({'recommendations': PokedexSerializer(popular_pokemons, many=True).data})

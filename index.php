@@ -33,41 +33,65 @@
         <button id="boutonAchete" onclick="location.href='php/catalogue.php';">Achetez dès maintenant !</button>
     </section>
 
-      </div>
-    </nav><br><br><br>
-    <?php
-    require  'include/databaseconnect.php';
+    <br><br><br>
 
-    $requete = $bdd->query("SELECT * FROM Pokedex ORDER BY RAND() LIMIT 3");
-    ?>
+    <script>
+    $(document).ready(function() {
+        // Vérifier si l'utilisateur est connecté en vérifiant la session
+        var accessToken = '<?php echo isset($_SESSION['access_token']) ? $_SESSION['access_token'] : ''; ?>';
+        var url = 'http://127.0.0.1:8000/api/recommandations/';
+        var headers = {};
 
-<nav class="jumbo-nav">
-  <div class="container">
-    <div class="row">
-      <?php
-        while ($row = $requete->fetch()) {
-          $imgPath = "./img/" . $row['image']; 
-          echo '<div class="col-md-4">';
-          echo '  <div class="pokeball-wrapper">';
-          echo '    <img src="./img/pokeball.png" />'; 
-          echo '  </div>';
-          echo '  <div class="enhanced">';
-          echo '    <h2>' . htmlspecialchars($row['nom']) . '</h2>'; 
-          echo '    <img class="pokemon small" src="' . htmlspecialchars($imgPath) . '" />'; 
-          echo '    Description : ' . html_entity_decode($row['description']) . '</p>'; 
-          echo '    Type principal : ' . htmlspecialchars($row['type_1']) . '</p>'; 
-          echo '     Remise de : <a style="color: red; font-size: 1.5em;">' . htmlspecialchars($row['discount']) . '%</p>'; 
-          echo '    <p><a class="btn btn-default" href="php/catalogue.php" role="button">View details &raquo;</a></p>';
-          echo '  </div>';
-          echo '</div>';
+        // Si l'utilisateur est connecté, ajouter le token dans le header
+        if (accessToken) {
+            headers['Authorization'] = 'Bearer ' + accessToken;
         }
-      ?>
-    </div>
-  </div>
-</nav>
 
-    
+        // Appel à l'API pour récupérer les recommandations
+        $.ajax({
+    type: "GET",
+    url: "http://127.0.0.1:8000/api/recommandations/",
+    success: function(response) {
+        var recommendations = response.recommendations;
+        var content = '';
+
+        // Boucle à travers les recommandations pour afficher chaque Pokémon
+        recommendations.forEach(function(pokemon) {
+            var imgPath = pokemon.image.replace("../img", "./img");  // Correction du chemin de l'image
+            content += '<div class="col-md-4">';
+            content += '  <div class="pokeball-wrapper">';
+            content += '    <img src="./img/pokeball.png" />';
+            content += '  </div>';
+            content += '  <div class="enhanced">';
+            content += '    <h2>' + pokemon.nom + '</h2>';
+            content += '    <img class="pokemon small" src="' + imgPath + '" />';  // Utilisation de l'image avec le chemin corrigé
+            content += '    <p>Description : ' + pokemon.description + '</p>';
+            content += '    <p>Type principal : ' + pokemon.type_1 + '</p>';
+            content += '    <p style="color: red; font-size: 1.5em;">Remise de : ' + pokemon.discount + '%</p>';
+            content += '    <p><a class="btn btn-default" href="php/catalogue.php" role="button">View details &raquo;</a></p>';
+            content += '  </div>';
+            content += '</div>';
+        });
+
+        // Insère le contenu dans la section appropriée de la page
+        $('.jumbo-nav .container .row').html(content);
+    },
+    error: function(xhr, status, error) {
+        console.error("Erreur lors de la récupération des recommandations : ", error);
+    }
+});
+
+    });
+    </script>
+
+    <nav class="jumbo-nav">
+      <div class="container">
+        <div class="row">
+          <!-- Les Pokémon seront affichés ici -->
+        </div>
+      </div>
+    </nav>
 
 </body>
 <?php include_once('include/footer.php'); ?>
-</html>
+</html> 
