@@ -140,6 +140,40 @@ curl_close($ch);
 
     $(document).ready(function() {
         recalculerTotal(); // Calcul initial au chargement de la page
+    });    function verifierQuantitesAvantValidation() {
+        let quantiteProbleme = false;
+
+        $('#panierTable tbody tr').each(function() {
+            const idPokemon = $(this).find('input[name="new_qty"]').data('idpok');
+            const quantiteSelectionnee = parseInt($(this).find('input[name="new_qty"]').val());
+            let quantiteDisponible = 0;
+
+            // Vérifier la quantité disponible à partir des données API
+            <?php foreach ($data as $pokemon): ?>
+                if (idPokemon == "<?php echo $pokemon->id; ?>") {
+                    quantiteDisponible = <?php echo $pokemon->quantite; ?>;
+                }
+            <?php endforeach; ?>
+
+            // Si la quantité sélectionnée est supérieure à celle disponible
+            if (quantiteSelectionnee > quantiteDisponible) {
+                quantiteProbleme = true;
+                alert(`La quantité sélectionnée pour ${$(this).find('input[name="new_qty"]').data('nom')} dépasse le stock disponible (${quantiteDisponible} en stock).`);
+            }
+        });
+
+        // Si aucun problème n'est trouvé, on redirige vers la validation de la commande
+        if (!quantiteProbleme) {
+            window.location.href = 'client/valider_commande.php';
+        }
+    }
+
+    $(document).ready(function() {
+        // Gestion du clic sur le bouton "Valider ma commande"
+        $('.btn-submit').on('click', function(event) {
+            event.preventDefault(); // Empêche la redirection immédiate
+            verifierQuantitesAvantValidation(); // Vérifie les quantités avant de valider
+        });
     });
 </script>
 
@@ -197,8 +231,8 @@ curl_close($ch);
                                 name="new_qty" 
                                 value="<?php echo $produit->quantite; ?>" 
                                 min="1"
-                                max="<?php echo $maxQuantite; ?>"
-                            >
+                                max="<?php echo $maxQuantite; ?>" <!-- Limite la quantité maximum -->
+                            
                         </form>
                     </td>
                     <td class="totalProduit">
@@ -240,8 +274,3 @@ curl_close($ch);
     <?php endif; ?>
     </div>
 </body>
-</html>
-
-<style>
-    /* Vos styles CSS */
-</style>
