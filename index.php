@@ -33,65 +33,60 @@
         <button id="boutonAchete" onclick="location.href='php/catalogue.php';">Achetez dès maintenant !</button>
     </section>
 
-    <br><br><br>
-
-    <script>
-    $(document).ready(function() {
-        // Vérifier si l'utilisateur est connecté en vérifiant la session
-        var accessToken = '<?php echo isset($_SESSION['access_token']) ? $_SESSION['access_token'] : ''; ?>';
-        var url = 'http://127.0.0.1:8000/api/recommandations/';
-        var headers = {};
-
-        // Si l'utilisateur est connecté, ajouter le token dans le header
-        if (accessToken) {
-            headers['Authorization'] = 'Bearer ' + accessToken;
-        }
-
-        // Appel à l'API pour récupérer les recommandations
-        $.ajax({
-    type: "GET",
-    url: "http://127.0.0.1:8000/api/recommandations/",
-    success: function(response) {
-        var recommendations = response.recommendations;
-        var content = '';
-
-        // Boucle à travers les recommandations pour afficher chaque Pokémon
-        recommendations.forEach(function(pokemon) {
-            var imgPath = pokemon.image.replace("../img", "./img");  // Correction du chemin de l'image
-            content += '<div class="col-md-4">';
-            content += '  <div class="pokeball-wrapper">';
-            content += '    <img src="./img/pokeball.png" />';
-            content += '  </div>';
-            content += '  <div class="enhanced">';
-            content += '    <h2>' + pokemon.nom + '</h2>';
-            content += '    <img class="pokemon small" src="' + imgPath + '" />';  // Utilisation de l'image avec le chemin corrigé
-            content += '    <p>Description : ' + pokemon.description + '</p>';
-            content += '    <p>Type principal : ' + pokemon.type_1 + '</p>';
-            content += '    <p style="color: red; font-size: 1.5em;">Remise de : ' + pokemon.discount + '%</p>';
-            content += '    <p><a class="btn btn-default" href="php/catalogue.php" role="button">View details &raquo;</a></p>';
-            content += '  </div>';
-            content += '</div>';
-        });
-
-        // Insère le contenu dans la section appropriée de la page
-        $('.jumbo-nav .container .row').html(content);
-    },
-    error: function(xhr, status, error) {
-        console.error("Erreur lors de la récupération des recommandations : ", error);
-    }
-});
-
-    });
-    </script>
-
     <nav class="jumbo-nav">
-      <div class="container">
-        <div class="row">
-          <!-- Les Pokémon seront affichés ici -->
+        <div class="container">
+            <div class="row" id="recommendations-container">
+                <!-- Les recommandations de Pokémon seront injectées ici via JS -->
+            </div>
         </div>
-      </div>
     </nav>
 
+    <script>
+        $(document).ready(function () {
+            let apiUrl;
+
+            // Vérifier si l'utilisateur est connecté en utilisant la session
+            <?php if (isset($_SESSION['user_id'])) { ?>
+                const userId = "<?php echo $_SESSION['user_id']; ?>";
+                apiUrl = `http://127.0.0.1:8000/api/utilisateurs/${userId}/recommandations/`;
+            <?php } else { ?>
+                apiUrl = "http://127.0.0.1:8000/api/recommandations/";
+            <?php } ?>
+
+            // Faire la requête à l'API
+            $.ajax({
+                type: "GET",
+                url: apiUrl,
+                success: function (response) {
+                    const recommendations = response.recommendations;
+
+                    recommendations.forEach(pokemon => {
+                        const pokemonHtml = `
+                            <div class="col-md-4">
+                                <div class="pokeball-wrapper">
+                                    <img src="img/pokeball.png" />
+                                </div>
+                                <div class="enhanced">
+                                    <h2>${pokemon.nom}</h2>
+                                    <img class="pokemon small" src="${pokemon.image.replace('../', '')}" alt="${pokemon.nom}" />
+                                    <p>Description : ${pokemon.description}</p>
+                                    <p>Type principal : ${pokemon.type_1}</p>
+                                    <p>Remise de : <span style="color: red; font-size: 1.5em;">${pokemon.discount}%</span></p>
+                                    <p><a class="btn btn-default" href="php/catalogue.php" role="button">View details &raquo;</a></p>
+                                </div>
+                            </div>
+                        `;
+
+                        $('#recommendations-container').append(pokemonHtml);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Erreur lors de la récupération des recommandations : ", error);
+                }
+            });
+        });
+    </script>
 </body>
+
 <?php include_once('include/footer.php'); ?>
-</html> 
+</html>

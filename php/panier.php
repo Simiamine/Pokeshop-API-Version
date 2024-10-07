@@ -73,8 +73,8 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 }
 
 curl_close($ch);
-
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -103,6 +103,14 @@ curl_close($ch);
     function majPanier(element) {
         var index = $(element).data('index');
         var newQty = parseInt($(element).val());
+        var maxQty = parseInt($(element).attr('max'));
+
+        // Vérifier que la nouvelle quantité ne dépasse pas le stock disponible
+        if (newQty > maxQty) {
+            alert('La quantité sélectionnée dépasse le stock disponible.');
+            $(element).val(maxQty); // Remettre la quantité à la valeur maximale
+            newQty = maxQty;
+        }
 
         // Mettre à jour le panier en backend via AJAX
         $.post('panier.php', { update_qty: true, index: index, new_qty: newQty }, function() {
@@ -165,11 +173,19 @@ curl_close($ch);
                 <tbody>
                 <?php 
                 foreach ($_SESSION['panier'] as $index => $produit): 
+                    // Obtenir la quantité maximale disponible pour ce produit à partir de l'API
+                    $maxQuantite = 0;
+                    foreach ($data as $pokemon) {
+                        if ($pokemon->id == $produit->pokemon_id) {
+                            $maxQuantite = $pokemon->quantite;
+                            break;
+                        }
+                    }
                 ?>
                 <tr>
                     <td><?php echo $produit->pokemon_id; ?></td> <!-- ID du Pokémon -->
                     <td><?php echo $produit->nom; ?></td> <!-- Nom du produit -->
-                    <td><?php echo $produit->prixApresRemise; ?>€</td> <!-- Prix après remise -->
+                    <td><?php echo $produit->prixApresRemise; ?></td> <!-- Prix après remise -->
                     <td>
                         <form class="qtyForm" data-index="<?php echo $index; ?>">
                             <input 
@@ -181,6 +197,7 @@ curl_close($ch);
                                 name="new_qty" 
                                 value="<?php echo $produit->quantite; ?>" 
                                 min="1"
+                                max="<?php echo $maxQuantite; ?>"
                             >
                         </form>
                     </td>
@@ -225,167 +242,6 @@ curl_close($ch);
 </body>
 </html>
 
-
 <style>
-    @import url('https://fonts.googleapis.com/css?family=Montserrat|Quicksand');
-
-*{
-    font-family: 'quicksand',Arial, Helvetica, sans-serif;
-    box-sizing: border-box;
-}
-
-body{
-    background:#fff;
-}
-
-.container {
-    width: 80%;
-    margin: 0 auto;
-}
-
-.titre{
-    text-align: center;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    font-size: 1.5rem !important;
-}
-
-.panier-vide {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.panier {
-    margin-top: 20px;
-}
-
-#panierTable {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-#panierTable th, #panierTable td {
-    border: 1px solid #ddd;
-    padding: 8px;
-}
-
-#panierTable th {
-    background-color: #f2f2f2;
-    text-align: left;
-}
-
-#panierTable tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-#panierTable tr:hover {
-    background-color: #ddd;
-}
-
-#panierTable td {
-    text-align: center;
-}
-
-.qtyForm input[type="number"] {
-    width: 50px;
-}
-
-.qtyForm input[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 12px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.btn-delete {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 12px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.btn-submit {
-    background-color: #52f436;
-    color: black;
-    border: none;
-    padding: 15px 30px;
-    text-align: center;
-    text-decoration: none;
-    
-    font-size: 14px;
-    margin: auto 2em auto;
-    margin-left:auto;
-    margin-right:auto;
-    margin-bottom:35px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.btn-submit_2{
-    background-color: #52f436;
-    color: black;
-    border: none;
-    padding: 15px 30px;
-    text-align: center;
-    text-decoration: none;
-    
-    font-size: 14px;
-    margin: auto 2em auto;
-    margin-left:auto;
-    margin-right:auto;
-    cursor: pointer;
-    border-radius: 5px;
-}
-#total {
-    font-weight: bold;
-}
-.commande-form {
-    margin-top: 20px;
-}
-
-.commande-form .form-group {
-    margin-bottom: 20px;
-}
-
-.commande-form label {
-    font-weight: bold;
-}
-
-.commande-form input[type="text"],
-.commande-form textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-}
-
-.commande-form button {
-    background-color: #52f436;
-    color: black;
-    border: none;
-    padding: 15px 30px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 14px;
-    margin: em auto 2em auto;
-    display: block;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
+    /* Vos styles CSS */
 </style>
