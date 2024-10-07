@@ -64,8 +64,8 @@
 
                             foreach ($commandes as $commande) {
                                 // Vérification que le champ utilisateur_id est bien présent
-                                if (isset($commande['utilisateur_id']) && !empty($commande['utilisateur_id'])) {
-                                    $utilisateur_id = $commande['utilisateur_id'];
+                                if (isset($commande['utilisateur']) && !empty($commande['utilisateur'])) {
+                                    $utilisateur_id = $commande['utilisateur'];
                                     $utilisateur_url = 'http://127.0.0.1:8000/api/utilisateurs/' . $utilisateur_id . '/';
 
                                     // Initialiser une nouvelle requête cURL pour l'utilisateur
