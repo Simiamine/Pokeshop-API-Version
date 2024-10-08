@@ -63,7 +63,7 @@ class AvisSerializer(serializers.ModelSerializer):
 class UtilisateurSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateur
-        fields = ['prenom', 'nom', 'email', 'telephone', 'date_naissance', 'password', 'statut']
+        fields = ['id','prenom', 'nom', 'email', 'telephone', 'date_naissance', 'password', 'statut']
 
     def create(self, validated_data):
         # Hasher le mot de passe avant de créer l'utilisateur
