@@ -145,16 +145,21 @@ class UserRegisterView(APIView):
 class UserUpdateDeleteView(APIView):
     def put(self, request, pk):
         utilisateur = get_object_or_404(Utilisateur, pk=pk)
-        serializer = UtilisateurSerializer(utilisateur, data=request.data, partial=True)
+        
+        # Récupérer les données envoyées dans la requête
+        data = request.data
+
+        # Si le mot de passe est envoyé dans les données de mise à jour, le hasher
+        if 'password' in data:
+            data['password'] = make_password(data['password'])  # Hasher le mot de passe
+        
+        # Utiliser le sérialiseur pour valider et sauvegarder les changements
+        serializer = UtilisateurSerializer(utilisateur, data=data, partial=True)
+        
         if serializer.is_valid():
-            serializer.save()
+            serializer.save()  # Sauvegarder les modifications
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def delete(self, request, pk):
-        utilisateur = get_object_or_404(Utilisateur, pk=pk)
-        utilisateur.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Vue pour gérer les commandes
 class CommandeViewSet(viewsets.ModelViewSet):

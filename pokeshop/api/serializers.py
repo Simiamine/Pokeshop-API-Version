@@ -63,9 +63,16 @@ class AvisSerializer(serializers.ModelSerializer):
 class UtilisateurSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateur
-        fields = ['id','prenom', 'nom', 'email', 'telephone', 'date_naissance', 'password', 'statut']
+        fields = ['prenom', 'nom', 'email', 'telephone', 'date_naissance', 'password', 'statut']
 
     def create(self, validated_data):
         # Hasher le mot de passe avant de créer l'utilisateur
         validated_data['password'] = make_password(validated_data['password'])
         return super(UtilisateurSerializer, self).create(validated_data)
+
+    def update(self, instance, validated_data):
+        # Hasher le mot de passe si un nouveau mot de passe est fourni
+        if 'password' in validated_data:
+            validated_data['password'] = make_password(validated_data['password'])
+        
+        return super(UtilisateurSerializer, self).update(instance, validated_data)
