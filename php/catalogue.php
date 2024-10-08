@@ -51,6 +51,11 @@
         <option value="Ténèbres">Ténèbres</option>
         <option value="Fée">Fée</option>
     </select>
+    <select id="legendary-filter" class="filter-select">
+    <option value="">Légendaire/Non légendaire</option>
+    <option value="Oui">Légendaire</option>
+    <option value="Non">Non légendaire</option>
+    </select>
 </div>
 
 <div class="cards-container">
@@ -119,7 +124,7 @@ if(curl_errno($curl)) {
     data-type="<?php echo $pokemon['type_1']; ?>"
     data-type2="<?php echo $pokemon['type_2']; ?>"
     data-generation="<?php echo $pokemon['generation']; ?>"
-    data-legendaire="<?php echo $legendaire; ?>"  
+    data-legendaire="<?php echo $pokemon['legendaire'] ? 'Oui' : 'Non'; ?>" 
     data-quantite="<?php echo $quantite; ?>"   
 >
     <div class="card-img-top-container">
@@ -270,24 +275,35 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <!-- Script pour le filtrage par type -->
 <script>
+// Script pour le filtrage par type et légendaire
 document.addEventListener("DOMContentLoaded", function() {
     const typeFilter = document.getElementById('type-filter');
+    const legendaryFilter = document.getElementById('legendary-filter');  // Ajout du filtre légendaire
     const cards = document.querySelectorAll('.card');
 
-    typeFilter.addEventListener('change', function() {
+    function filterCards() {
         const selectedType = typeFilter.value.toLowerCase();
+        const selectedLegendary = legendaryFilter.value.toLowerCase();
 
         cards.forEach(card => {
             const type1 = card.getAttribute('data-type').toLowerCase();
             const type2 = card.getAttribute('data-type2').toLowerCase();
+            const isLegendary = card.getAttribute('data-legendaire').toLowerCase();
 
-            if (selectedType === '' || type1 === selectedType || type2 === selectedType) {
+            const matchesType = (selectedType === '' || type1 === selectedType || type2 === selectedType);
+            const matchesLegendary = (selectedLegendary === '' || isLegendary === selectedLegendary);
+
+            if (matchesType && matchesLegendary) {
                 card.style.display = 'block';
             } else {
                 card.style.display = 'none';
             }
         });
-    });
+    }
+
+    // Ajouter les écouteurs d'événements pour les filtres
+    typeFilter.addEventListener('change', filterCards);
+    legendaryFilter.addEventListener('change', filterCards);  // Ajout du listener pour le filtre légendaire
 });
 </script>
 
