@@ -113,8 +113,7 @@ if(curl_errno($curl)) {
         $bg_gradient = ($pokemon['type_2']) ? "background: linear-gradient(135deg, $bg_color_1, $bg_color_2);" : "background-color: $bg_color_1;";
 
         // Vérifier si la clé 'légendaire' existe avant de l'utiliser
-        $legendaire = isset($pokemon['légendaire']) ? $pokemon['légendaire'] : 'Non défini';
-
+        $legendaire = $pokemon['legendaire'] ? 'Oui' : 'Non';  // Remplace 'légendaire' par 'legendaire'
         // Vérifier si la clé 'quantité' existe avant de l'utiliser
         $quantite = isset($pokemon['quantité']) ? $pokemon['quantité'] : 'Non défini';
 ?>
@@ -126,7 +125,7 @@ if(curl_errno($curl)) {
     data-type="<?php echo $pokemon['type_1']; ?>"
     data-type2="<?php echo $pokemon['type_2']; ?>"
     data-generation="<?php echo $pokemon['generation']; ?>"
-    data-legendaire="<?php echo $legendaire; ?>"  
+    data-legendaire="<?php echo $pokemon['legendaire'] ? 'Oui' : 'Non'; ?>"  
     data-quantite="<?php echo $quantite; ?>"   
 >
     <div class="card-img-top-container">
@@ -250,8 +249,7 @@ document.addEventListener("DOMContentLoaded", function() {
         popupImage.src = image;
         popupDescription.textContent = description;
         document.getElementById('generation').textContent = generation;
-        document.getElementById('legendaire').textContent = legendaire === '1' ? 'Oui' : 'Non';
-
+        document.getElementById('legendaire').textContent = legendaire === 'Oui' ? 'Oui' : 'Non';
         if (quantite <= 0) {
             document.getElementById('quantite').innerHTML = "<span style='color: red; font-size: 1.5em;'>Victime de son succès</span>";
             document.querySelector('.button-ajouter').style.display = 'none';
