@@ -137,7 +137,7 @@ if (isset($commande['utilisateur']) && !empty($commande['utilisateur'])) {
         <h2>Détail de la commande #<?= htmlspecialchars($commande['id']) ?></h2>
 
         <div class="commande-summary">
-            <p><strong>Client :</strong> <?= htmlspecialchars($commande['utilisateur_id']) ?></p> <!-- Affichage du client -->
+            <p><strong>Client :</strong> <?= htmlspecialchars($commande['utilisateur']) ?></p> <!-- Affichage du client -->
             <p><strong>Numéro de commande :</strong> <?= htmlspecialchars($commande['numero_commande']) ?></p>
             <p><strong>Adresse de livraison :</strong> <?= htmlspecialchars($commande['ville']) ?>, <?= htmlspecialchars($commande['code_postal']) ?></p>
             <p><strong>Date :</strong> <?= htmlspecialchars($commande['date_creation']) ?></p>
@@ -161,11 +161,23 @@ if (isset($commande['utilisateur']) && !empty($commande['utilisateur'])) {
         <?php 
         // Vérification des détails de la commande
         if (!empty($commande['details'])) { 
-            foreach ($commande['details'] as $detail) { ?>
+            foreach ($commande['details'] as $detail) { 
+                // Récupération du nom du Pokémon à partir de son ID
+                $pokemon_id = $detail['produit'];  // ID du produit/ Pokémon
+                $pokemon_url = "http://127.0.0.1:8000/api/pokedex/{$pokemon_id}/";
+                $pokemon_data = file_get_contents($pokemon_url);
+                $pokemon = json_decode($pokemon_data, true);
+
+                if (!$pokemon || !isset($pokemon['nom'])) {
+                    $pokemon_nom = "Nom inconnu"; // Gérer le cas où le nom n'est pas trouvé
+                } else {
+                    $pokemon_nom = htmlspecialchars($pokemon['nom']); // Nom du Pokémon
+                }
+        ?>
                 <div class="produit-card">
                     <div class="produit-info">
                         <div>
-                            <h5><?= htmlspecialchars($detail['produit_nom']) ?></h5>
+                            <h5><?= $pokemon_nom ?></h5>
                             <span>Quantité : <?= htmlspecialchars($detail['quantite']) ?></span><br>
                         </div>
                     </div>
