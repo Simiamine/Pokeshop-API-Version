@@ -16,31 +16,33 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/contact.css">
     <link rel="icon" type="image/png" href="../img/icon.png"/>
-
-
-
 </head>
 <body>
 <?php include_once('../include/header.php'); ?>
     <script>
-        $("#contact").addClass("active");  // Fonction pour mettre la class "active" en fonction de la page
+        $(document).ready(function() {
+            $("#contact").addClass("active");  // Fonction pour mettre la classe "active" en fonction de la page
+        });
     </script>
-
 
 <section id="contact-form">
     <div class="container">
         <div class="formulaire">
-        <form action="contact.php" method="post">
-            <div id="titreContact">Contact</div><br>
-            <div id="infoComp">Veuillez remplir le formulaire ci dessous<br> Ou contactez-nous au <a style="color : #cc0000;" href tel=0123456789>+33 1 23 45 67 89</a><br></div>
-            <label for="name">Nom :</label><br>
-            <input type="text" id="name" name="name" required><br>
-            <label for="email">Email :</label><br>
-            <input type="email" id="email" name="email" required><br>
-            <label for="message">Message :</label><br>
-            <textarea id="message" name="message" rows="4" required></textarea><br>
-            <input type="submit" value="Envoyer">
-        </form>
+            <form action="contact.php" method="post">
+                <div id="titreContact">Contact</div><br>
+                <div id="infoComp">Veuillez remplir le formulaire ci-dessous<br> Ou contactez-nous au <a style="color: #cc0000;" href="tel:+33123456789">+33 1 23 45 67 89</a><br></div>
+                
+                <label for="name">Nom :</label><br>
+                <input type="text" id="name" name="name" required><br>
+                
+                <label for="email">Email :</label><br>
+                <input type="email" id="email" name="email" required><br>
+                
+                <label for="message">Message :</label><br>
+                <textarea id="message" name="message" rows="4" required></textarea><br>
+                
+                <input type="submit" value="Envoyer">
+            </form>
         </div>
     </div>
 </section>
@@ -49,22 +51,19 @@
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $name = strip_tags(trim($_POST["name"]));
         $email = filter_var(trim($_POST["email"]), FILTER_SANITIZE_EMAIL);
-        $message = trim($_POST["message"]);
+        $message = strip_tags(trim($_POST["message"]));
 
         if (empty($name) || !filter_var($email, FILTER_VALIDATE_EMAIL) || empty($message)) {
-            echo "Veuillez remplir les champs.";
-            exit;
-        }
-
-        if (mailContact($name, $email, $message)) {
-            echo "<div class='alert-vert'>Votre message a été envoyé avec succès !</div>";
+            echo "<div class='alert-orange'>Veuillez remplir tous les champs correctement.</div>";
         } else {
-            echo "<div class='alert-orange'>Hmmm... Il y a une erreur...</div>";
+            if (mailContact($name, $email, $message)) {
+                echo "<div class='alert-vert'>Votre message a été envoyé avec succès !</div>";
+            } else {
+                echo "<div class='alert-orange'>Hmmm... Il y a une erreur, veuillez réessayer plus tard.</div>";
+            }
         }
     }
 ?>
-</section>
 </body>
 <?php include_once('../include/footer.php'); ?>
 </html>
-

@@ -107,5 +107,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Sélectionner les formulaires de connexion et d'inscription
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+
+        // Ajouter un écouteur d'événement sur le formulaire de connexion
+        loginForm.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                connex(); // Déclencher la fonction de connexion
+            }
+        });
+
+        // Ajouter un écouteur d'événement sur le formulaire d'inscription
+        signupForm.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                inscript(); // Déclencher la fonction d'inscription
+            }
+        });
+    });
+</script>
 <?php include_once('../include/footer.php'); ?>
 </html> 
