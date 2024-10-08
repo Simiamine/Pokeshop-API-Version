@@ -19,9 +19,17 @@ $path = "/".basename(dirname(dirname(__FILE__)));  // Permet d'obtenir le nom du
             <li>
                 <a id="panier" style="margin-left: -30px;" class="ligne-header" href="<?php echo $path."/php/panier.php";?>">
                     <i class="fa-solid fa-bag-shopping fa-xl" ></i>
-                    <span id="panierCount" >
-                        <?php echo isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0; ?>
-                    </span>
+                    <span id="panierCount">
+                    <?php 
+                        $totalQuantity = 0;
+                        if (isset($_SESSION['panier'])) {
+                            foreach ($_SESSION['panier'] as $produit) {
+                                $totalQuantity += $produit->quantite;
+                            }
+                        }
+                        echo $totalQuantity;
+                    ?>
+                </span>
                 </a>
             </li>
 

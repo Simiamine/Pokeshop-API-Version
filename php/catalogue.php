@@ -52,9 +52,9 @@
         <option value="Fée">Fée</option>
     </select>
     <select id="legendary-filter" class="filter-select">
-    <option value="">Légendaire/Non légendaire</option>
-    <option value="Oui">Légendaire</option>
-    <option value="Non">Non légendaire</option>
+        <option value="">Légendaire/Non légendaire</option>
+        <option value="Oui">Légendaire</option>
+        <option value="Non">Non légendaire</option>
     </select>
 </div>
 
@@ -112,7 +112,7 @@ if(curl_errno($curl)) {
         $bg_gradient = ($pokemon['type_2']) ? "background: linear-gradient(135deg, $bg_color_1, $bg_color_2);" : "background-color: $bg_color_1;";
 
         // Vérifier si la clé 'légendaire' existe avant de l'utiliser
-        $legendaire = $pokemon['legendaire'] ? 'Oui' : 'Non';  // Remplace 'légendaire' par 'legendaire'
+        $legendaire = $pokemon['legendaire'] ? 'Oui' : 'Non';  
         // Vérifier si la clé 'quantité' existe avant de l'utiliser
         $quantite = isset($pokemon['quantite']) ? $pokemon['quantite'] : 'Non défini';
 ?>
@@ -121,11 +121,14 @@ if(curl_errno($curl)) {
     data-name="<?php echo $pokemon['nom']; ?>" 
     data-image="../img/<?php echo $pokemon['image']; ?>" 
     data-description="<?php echo $pokemon['description']; ?>"
+
     data-type="<?php echo $pokemon['type_1']; ?>"
     data-type2="<?php echo $pokemon['type_2']; ?>"
     data-generation="<?php echo $pokemon['generation']; ?>"
     data-legendaire="<?php echo $pokemon['legendaire'] ? 'Oui' : 'Non'; ?>" 
     data-quantite="<?php echo $quantite; ?>"   
+    data-prix="<?php echo $pokemon['prix']; ?>"
+    data-remise="<?php echo $pokemon['discount']; ?>"
 >
     <div class="card-img-top-container">
         <img src="../img/<?php echo $pokemon['image']; ?>" class="card-img-top" alt="Image du pokemon">
@@ -203,7 +206,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const popupId = document.getElementById('pokemonID');
     const addToCartButton = document.querySelector('.button-ajouter');
 
-    // Stockage local de la quantité de chaque Pokémon
+    // Stockage local des quantités disponibles
     let quantitesDisponibles = {};
 
     // Initialiser les quantités disponibles pour chaque Pokémon
@@ -213,6 +216,7 @@ document.addEventListener("DOMContentLoaded", function() {
         quantitesDisponibles[id] = quantiteDisponible;
     });
 
+    // Fonction pour ouvrir la popup
     function openPopup(id, name, image, description, quantite, price, discountedPrice) {
         popupId.textContent = id;
         popupName.textContent = name;
@@ -223,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (quantiteDisponible <= 0) {
             quantiteElement.innerHTML = "<span style='color: red; font-size: 1.5em;'>Victime de son succès</span>";
-            addToCartButton.style.display = 'none'; 
+            addToCartButton.style.display = 'none';
         } else {
             quantiteElement.innerHTML = `<span style="font-size: 1.5em;">Quantité disponible : <span style="color: green;">${quantiteDisponible}</span></span>`;
             addToCartButton.style.display = 'block';
@@ -234,6 +238,7 @@ document.addEventListener("DOMContentLoaded", function() {
         popup.style.display = 'block';
     }
 
+    // Associer l'événement click aux cartes pour ouvrir la popup
     cards.forEach(card => {
         card.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
@@ -251,26 +256,62 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
+    // Fermeture de la popup
     closePopup.addEventListener('click', function() {
         popup.style.display = 'none';
     });
 
-    // Ajouter au panier
+    // Ajouter au panier et mettre à jour le panier en haut à droite
     addToCartButton.addEventListener('click', function() {
         const id = popupId.textContent;
         const quantiteRestante = quantitesDisponibles[id];
+
         if (quantiteRestante <= 0) {
             alert('Stock épuisé pour ce Pokémon.');
             return;
         }
 
-        // Mise à jour du stock local sans affecter l'API
+        // Mise à jour du stock local
         quantitesDisponibles[id] -= 1;
         quantiteElement.innerHTML = `<span style="font-size: 1.5em;">Quantité disponible : <span style="color: green;">${quantitesDisponibles[id]}</span></span>`;
 
-        alert("Votre Pokémon a été ajouté au panier");
+        // Données à envoyer à ajouter_au_panier.php
+        const produit = {
+            pokemon_id: id,
+            nom: popupName.textContent,
+            prix: document.getElementById('initialPrice').textContent,
+            prixApresRemise: document.getElementById('discountedPrice').textContent
+        };
+
+        // Requête AJAX vers ajouter_au_panier.php
+        fetch('ajouter_au_panier.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(produit)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Erreur lors de l\'ajout au panier.');
+            } else {
+                alert("Votre Pokémon a été ajouté au panier");
+
+                // Mettre à jour le compteur du panier en haut à droite
+                document.getElementById('panierCount').textContent = data.totalArticles;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors de l\'ajout au panier:', error);
+        });
+
+        popup.style.display = 'none'; // Fermer la popup après l'ajout au panier
     });
 });
+
+
+
 </script>
 
 <!-- Script pour le filtrage par type -->
@@ -278,7 +319,7 @@ document.addEventListener("DOMContentLoaded", function() {
 // Script pour le filtrage par type et légendaire
 document.addEventListener("DOMContentLoaded", function() {
     const typeFilter = document.getElementById('type-filter');
-    const legendaryFilter = document.getElementById('legendary-filter');  // Ajout du filtre légendaire
+    const legendaryFilter = document.getElementById('legendary-filter');  
     const cards = document.querySelectorAll('.card');
 
     function filterCards() {
@@ -303,9 +344,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Ajouter les écouteurs d'événements pour les filtres
     typeFilter.addEventListener('change', filterCards);
-    legendaryFilter.addEventListener('change', filterCards);  // Ajout du listener pour le filtre légendaire
+    legendaryFilter.addEventListener('change', filterCards);  
 });
 </script>
+</body>
+</html>
+
 
 <style>
 /* Styles CSS pour le catalogue */
