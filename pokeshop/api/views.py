@@ -1,10 +1,11 @@
-import stripe
+import stripe, requests
 from django.contrib.auth import authenticate
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -278,7 +279,7 @@ class PaiementView(APIView):
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url='https://example.com/success',  # URL de succès à personnaliser
+                success_url='http://localhost:8083/Pokeshop-API-Version/php/ecran_de_validation.php',  # URL de succès à personnaliser
                 cancel_url='https://example.com/cancel',    # URL d'annulation
             )
 
@@ -299,6 +300,7 @@ class PaiementView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class StatutPaiementView(APIView):
     def get(self, request, transaction_id):
         try:
@@ -313,7 +315,108 @@ class StatutPaiementView(APIView):
             'date_creation': paiement.date_creation
         })
     
+class CommandePaiementView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request, *args, **kwargs):
+        utilisateur = request.user
+        commande_data = request.data.get('commande')
+        montant = request.data.get('montant')
+
+        if not commande_data:
+            return Response({'error': 'Les informations de la commande sont requises.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not montant or montant <= 0:
+            return Response({'error': 'Le montant doit être supérieur à zéro.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        adresse_livraison = commande_data.get('adresse_livraison')
+        ville = commande_data.get('ville')
+        code_postal = commande_data.get('code_postal')
+        details = commande_data.get('details')
+
+        if not all([adresse_livraison, ville, code_postal, details]):
+            return Response({'error': 'Tous les champs de la commande sont requis (adresse_livraison, ville, code_postal, details).'}, status=status.HTTP_400_BAD_REQUEST)
+
+        total_commande = 0
+        for item in details:
+            produit_id = item.get('produit')
+            quantite = item.get('quantite', 1)
+
+            if not produit_id or quantite <= 0:
+                return Response({'error': 'Chaque détail doit contenir un produit valide et une quantité supérieure à zéro.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                produit = Pokedex.objects.get(id=produit_id)
+            except Pokedex.DoesNotExist:
+                return Response({'error': f'Produit avec ID {produit_id} non trouvé.'}, status=status.HTTP_404_NOT_FOUND)
+
+            total_commande += produit.prix * quantite
+
+        try:
+            commande = Commande.objects.create(
+                utilisateur=utilisateur,
+                adresse_livraison=adresse_livraison,
+                ville=ville,
+                code_postal=code_postal,
+                livraison="Standard",
+                total=total_commande,
+                numero_commande=f"CMD-{timezone.now().strftime('%Y%m%d%H%M%S')}",
+                statut='EN_TRAITEMENT'
+            )
+
+            for item in details:
+                produit = Pokedex.objects.get(id=item['produit'])
+                quantite = item['quantite']
+                CommandeProduit.objects.create(commande=commande, produit=produit, quantite=quantite)
+
+                # Appeler l'API pour mettre à jour le stock de chaque produit
+                url = f"http://127.0.0.1:8000/api/pokedex/{produit.id}/update-stock/"
+                headers = {
+                    'Authorization': f'Bearer {request.auth}',
+                    'Content-Type': 'application/json'
+                }
+                data = {'quantite': quantite}
+                response = requests.post(url, headers=headers, json=data)
+
+                if response.status_code != 200:
+                    return Response({'error': f"Erreur lors de la mise à jour du stock pour le produit {produit.nom}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'eur',
+                        'product_data': {
+                            'name': f"Commande {commande.numero_commande}",
+                        },
+                        'unit_amount': int(float(total_commande) * 100),
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url='http://localhost:8083/Pokeshop-API-Version/php/ecran_de_validation.php',
+                cancel_url='https://example.com/cancel',
+            )
+
+            Paiement.objects.create(
+                transaction_id=session.id,
+                commande=commande,
+                montant=total_commande,
+                statut='en_attente',
+            )
+
+            return Response({
+                'commande_id': commande.id,
+                'paiement': PaiementSerializer(Paiement.objects.get(transaction_id=session.id)).data,
+                'stripe_url': session.url
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            commande.delete()
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class AvisViewSet(viewsets.ModelViewSet):
     queryset = Avis.objects.all()

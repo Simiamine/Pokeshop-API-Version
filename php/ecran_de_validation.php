@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+// Réinitialiser le panier après validation
+$_SESSION['panier'] = array();
+$_SESSION['finalPrice'] = 0;
+
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
