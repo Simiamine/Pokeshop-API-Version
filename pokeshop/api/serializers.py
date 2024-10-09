@@ -52,13 +52,14 @@ class PaiementSerializer(serializers.ModelSerializer):
         model = Paiement
         fields = '__all__'
 
-class AvisSerializer(serializers.ModelSerializer):
+class AvisSerializer(serializers.ModelSerializer): 
     utilisateur = serializers.StringRelatedField()  # Pour afficher un champ lisible de l'utilisateur
     produit = serializers.StringRelatedField()  # Pour afficher un champ lisible du produit
+    utilisateur_id = serializers.PrimaryKeyRelatedField(read_only=True, source='utilisateur')  # Ajout de l'ID utilisateur
 
     class Meta:
         model = Avis
-        fields = ['id', 'utilisateur', 'produit', 'note', 'commentaire', 'date_creation']
+        fields = ['id', 'utilisateur', 'utilisateur_id', 'produit', 'note', 'commentaire', 'date_creation']
 
 class UtilisateurSerializer(serializers.ModelSerializer):
     class Meta:

@@ -34,7 +34,7 @@ $path = "/".basename(dirname(dirname(__FILE__)));  // Permet d'obtenir le nom du
             </li>
 
             <?php } elseif(isset($_SESSION['user_statut']) && $_SESSION['user_statut'] == 'admin'){ ?>
-            <li>Compte_Admin </li>
+            <li><a href="<?php echo $path."/php/catalogue.php";?>" id="catalogue" class="ligne-header">Catalogue</a></li>
             <li><a href="<?php echo $path."/php/admin/analyse.php";?>" id="ajtPokemon" class="ligne-header">Analyse</a></li>
             <li><a href="<?php echo $path."/php/admin/ajout_pok.php";?>" id="pokemon" class="ligne-header">Pokemons</a></li>
             <li><a href="<?php echo $path."/php/admin/afficher_utilisateur.php";?>" id="utilisateur" class="ligne-header">Utilisateurs</a></li>

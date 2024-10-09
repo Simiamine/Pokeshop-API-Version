@@ -327,19 +327,24 @@ class AvisViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(avis, many=True)
         return Response(serializer.data)
 
-
     @action(detail=True, methods=['post'], url_path='ajouter-avis', permission_classes=[IsAuthenticated])
     def ajouter_avis(self, request, pk=None):
         produit = get_object_or_404(Pokedex, pk=pk)
-        utilisateur = request.user  # L'utilisateur authentifié est accessible ici
+        utilisateur = request.user  # Utilisateur authentifié
 
-        # Vérifier si l'utilisateur a acheté le produit via le modèle CommandeProduit
-        if not CommandeProduit.objects.filter(commande__utilisateur=utilisateur, produit=produit).exists():
-            return Response({"error": "Vous devez acheter ce produit pour laisser un avis"}, status=status.HTTP_403_FORBIDDEN)
-        
+        # Vérifier si l'utilisateur est admin ou s'il a acheté le produit
+        if utilisateur.statut != 'admin':  # Si l'utilisateur n'est pas admin
+            if not CommandeProduit.objects.filter(commande__utilisateur=utilisateur, produit=produit).exists():
+                return Response({"error": "Vous devez acheter ce produit pour laisser un avis"}, status=status.HTTP_403_FORBIDDEN)
+
         note = request.data.get('note')
         commentaire = request.data.get('commentaire')
 
+        # Vérification des champs obligatoires
+        if not note or not commentaire:
+            return Response({"error": "Les champs 'note' et 'commentaire' sont obligatoires"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Créer l'avis
         avis = Avis.objects.create(
             utilisateur=utilisateur,
             produit=produit,
@@ -349,15 +354,17 @@ class AvisViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "Avis ajouté avec succès", "avis": AvisSerializer(avis).data}, status=status.HTTP_201_CREATED)
 
-    # Supprimer un avis (réservé aux administrateurs)
-    @action(detail=True, methods=['delete'], url_path='supprimer-avis')
+    @action(detail=True, methods=['delete'], url_path='supprimer-avis', permission_classes=[IsAuthenticated])
     def supprimer_avis(self, request, pk=None):
+        utilisateur = request.user  # Utilisateur authentifié
         avis = get_object_or_404(Avis, pk=pk)
-        utilisateur = request.user
-        if utilisateur.statut != 'admin':
-            return Response({"error": "Vous n'êtes pas autorisé à supprimer cet avis"}, status=status.HTTP_403_FORBIDDEN)
-        avis.delete()
-        return Response({"message": "Avis supprimé avec succès"}, status=status.HTTP_204_NO_CONTENT)
+
+        # Vérifier si l'utilisateur est l'auteur de l'avis ou s'il est administrateur
+        if utilisateur.statut == 'admin' or avis.utilisateur == utilisateur:
+            avis.delete()
+            return Response({"message": "Avis supprimé avec succès"}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({"error": "Vous n'avez pas l'autorisation de supprimer cet avis"}, status=status.HTTP_403_FORBIDDEN)
     
 class LoginView(APIView): 
     def post(self, request):

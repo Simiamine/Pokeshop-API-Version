@@ -20,7 +20,7 @@
 
 <?php include_once('../include/header.php'); ?>
 <script>
-    $("#catalogue").addClass("active");  // Fonction pour mettre la class "active" en fonction de la page
+    $("#catalogue").addClass("active");  // Fonction pour mettre la     class "active" en fonction de la page
 </script>
 
 <body>  
@@ -52,9 +52,9 @@
         <option value="Fée">Fée</option>
     </select>
     <select id="legendary-filter" class="filter-select">
-        <option value="">Légendaire/Non légendaire</option>
-        <option value="Oui">Légendaire</option>
-        <option value="Non">Non légendaire</option>
+    <option value="">Légendaire/Non légendaire</option>
+    <option value="Oui">Légendaire</option>
+    <option value="Non">Non légendaire</option>
     </select>
 </div>
 
@@ -112,7 +112,7 @@ if(curl_errno($curl)) {
         $bg_gradient = ($pokemon['type_2']) ? "background: linear-gradient(135deg, $bg_color_1, $bg_color_2);" : "background-color: $bg_color_1;";
 
         // Vérifier si la clé 'légendaire' existe avant de l'utiliser
-        $legendaire = $pokemon['legendaire'] ? 'Oui' : 'Non';  
+        $legendaire = $pokemon['legendaire'] ? 'Oui' : 'Non';  // Remplace 'légendaire' par 'legendaire'
         // Vérifier si la clé 'quantité' existe avant de l'utiliser
         $quantite = isset($pokemon['quantite']) ? $pokemon['quantite'] : 'Non défini';
 ?>
@@ -121,14 +121,11 @@ if(curl_errno($curl)) {
     data-name="<?php echo $pokemon['nom']; ?>" 
     data-image="../img/<?php echo $pokemon['image']; ?>" 
     data-description="<?php echo $pokemon['description']; ?>"
-
     data-type="<?php echo $pokemon['type_1']; ?>"
     data-type2="<?php echo $pokemon['type_2']; ?>"
     data-generation="<?php echo $pokemon['generation']; ?>"
     data-legendaire="<?php echo $pokemon['legendaire'] ? 'Oui' : 'Non'; ?>" 
     data-quantite="<?php echo $quantite; ?>"   
-    data-prix="<?php echo $pokemon['prix']; ?>"
-    data-remise="<?php echo $pokemon['discount']; ?>"
 >
     <div class="card-img-top-container">
         <img src="../img/<?php echo $pokemon['image']; ?>" class="card-img-top" alt="Image du pokemon">
@@ -194,6 +191,8 @@ curl_close($curl);
 </div>
 
 <!-- Script pour la gestion des quantités -->
+
+<!-- Script pour rendre les Pokémon cliquables et gérer l'ajout au panier -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const cards = document.querySelectorAll('.card');
@@ -205,18 +204,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const closePopup = document.querySelector('.popup .close');
     const popupId = document.getElementById('pokemonID');
     const addToCartButton = document.querySelector('.button-ajouter');
-
-    // Stockage local des quantités disponibles
     let quantitesDisponibles = {};
 
     // Initialiser les quantités disponibles pour chaque Pokémon
-    cards.forEach(card => {
-        const id = card.getAttribute('data-id');
-        const quantiteDisponible = parseInt(card.getAttribute('data-quantite'));
-        quantitesDisponibles[id] = quantiteDisponible;
-    });
+cards.forEach(card => {
+    const id = card.getAttribute('data-id');
+    const quantiteDisponible = parseInt(card.getAttribute('data-quantite'));
+    quantitesDisponibles[id] = quantiteDisponible;
+});
 
-    // Fonction pour ouvrir la popup
+    // Fonction pour ouvrir la popup (rendre cliquable)
     function openPopup(id, name, image, description, quantite, price, discountedPrice) {
         popupId.textContent = id;
         popupName.textContent = name;
@@ -224,21 +221,20 @@ document.addEventListener("DOMContentLoaded", function() {
         popupDescription.textContent = description;
 
         const quantiteDisponible = quantitesDisponibles[id];
-
         if (quantiteDisponible <= 0) {
             quantiteElement.innerHTML = "<span style='color: red; font-size: 1.5em;'>Victime de son succès</span>";
-            addToCartButton.style.display = 'none';
+            addToCartButton.style.display = 'none';  // Désactiver l'ajout au panier uniquement
         } else {
             quantiteElement.innerHTML = `<span style="font-size: 1.5em;">Quantité disponible : <span style="color: green;">${quantiteDisponible}</span></span>`;
-            addToCartButton.style.display = 'block';
+            addToCartButton.style.display = 'block';  // Afficher le bouton si le stock est disponible
         }
 
         document.getElementById('initialPrice').textContent = price;
         document.getElementById('discountedPrice').textContent = discountedPrice;
-        popup.style.display = 'block';
+        popup.style.display = 'block';  // Toujours afficher la popup
     }
 
-    // Associer l'événement click aux cartes pour ouvrir la popup
+    // Rendre les cartes cliquables pour tous les utilisateurs (connectés ou non)
     cards.forEach(card => {
         card.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
@@ -256,70 +252,294 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // Fermeture de la popup
-    closePopup.addEventListener('click', function() {
-        popup.style.display = 'none';
-    });
 
-    // Ajouter au panier et mettre à jour le panier en haut à droite
+    // Gérer l'ajout au panier
     addToCartButton.addEventListener('click', function() {
+            // Vérifier si l'utilisateur est connecté
+        if (!<?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>){
+            // Si l'utilisateur n'est pas connecté, afficher une popup d'erreur
+            alert("Erreur : Vous devez être connecté pour ajouter un Pokémon au panier.");
+            return;
+        }
+
         const id = popupId.textContent;
         const quantiteRestante = quantitesDisponibles[id];
-
         if (quantiteRestante <= 0) {
             alert('Stock épuisé pour ce Pokémon.');
             return;
         }
 
-        // Mise à jour du stock local
+        // Mise à jour du stock local sans affecter l'API
         quantitesDisponibles[id] -= 1;
         quantiteElement.innerHTML = `<span style="font-size: 1.5em;">Quantité disponible : <span style="color: green;">${quantitesDisponibles[id]}</span></span>`;
 
-        // Données à envoyer à ajouter_au_panier.php
-        const produit = {
-            pokemon_id: id,
-            nom: popupName.textContent,
-            prix: document.getElementById('initialPrice').textContent,
-            prixApresRemise: document.getElementById('discountedPrice').textContent
-        };
+        alert("Votre Pokémon a été ajouté au panier");
+    });
 
-        // Requête AJAX vers ajouter_au_panier.php
-        fetch('ajouter_au_panier.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(produit)
+    // Fermer la popup
+    closePopup.addEventListener('click', function() {
+        popup.style.display = 'none';
+    });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cards = document.querySelectorAll('.card');
+    const popup = document.getElementById('pokemonPopup');
+    const popupName = document.getElementById('pokemonName');
+    const popupImage = document.getElementById('pokemonImage');
+    const popupDescription = document.getElementById('pokemonDescription');
+    const quantiteElement = document.getElementById('quantite');
+    const closePopup = document.querySelector('.popup .close');
+    const popupId = document.getElementById('pokemonID');
+    const addToCartButton = document.querySelector('.button-ajouter');
+
+    // Stockage local de la quantité de chaque Pokémon
+    let quantitesDisponibles = {};
+
+// Initialiser les quantités disponibles pour chaque Pokémon
+cards.forEach(card => {
+    const id = card.getAttribute('data-id');
+    const quantiteDisponible = parseInt(card.getAttribute('data-quantite'));
+    quantitesDisponibles[id] = quantiteDisponible;
+});
+
+function openPopup(id, name, image, description, quantite, price, discountedPrice) {
+    popupId.textContent = id;
+    popupName.textContent = name;
+    popupImage.src = image;
+    popupDescription.textContent = description;
+
+    const quantiteDisponible = quantitesDisponibles[id];
+
+    // Toujours afficher la popup, même si le stock est épuisé
+    if (quantiteDisponible <= 0) {
+        quantiteElement.innerHTML = "<span style='color: red; font-size: 1.5em;'>Victime de son succès</span>";
+        addToCartButton.style.display = 'none';  // Désactiver l'ajout au panier uniquement
+    } else {
+        quantiteElement.innerHTML = `<span style="font-size: 1.5em;">Quantité disponible : <span style="color: green;">${quantiteDisponible}</span></span>`;
+        addToCartButton.style.display = 'block';  // Afficher le bouton si le stock est disponible
+    }
+
+    document.getElementById('initialPrice').textContent = price;
+    document.getElementById('discountedPrice').textContent = discountedPrice;
+    popup.style.display = 'block';  // Toujours afficher la popup
+}
+
+// Associer l'événement click aux cartes pour ouvrir la popup (fonctionne pour tous les utilisateurs)
+cards.forEach(card => {
+    card.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const name = this.getAttribute('data-name');
+        const image = this.getAttribute('data-image');
+        const description = this.getAttribute('data-description');
+        const quantite = this.getAttribute('data-quantite');
+        const priceElement = this.querySelector('.price') || this.querySelector('.original-price');
+        const discountedPriceElement = this.querySelector('.discounted-price');
+
+        const price = priceElement ? priceElement.textContent : 'N/A';
+        const discountedPrice = (parseFloat(priceElement.textContent) * 0.8).toFixed(2) + '€';
+
+        
+
+        // Ouvrir la popup même si l'utilisateur n'est pas connecté
+        openPopup(id, name, image, description, quantite, price, discountedPrice);
+    });
+});
+
+// Fermer la popup
+closePopup.addEventListener('click', function() {
+    popup.style.display = 'none';
+});
+
+// Ajouter au panier (vérification si l'utilisateur est connecté, sinon désactiver l'ajout)
+addToCartButton.addEventListener('click', function() {
+    const id = popupId.textContent;
+    const quantiteRestante = quantitesDisponibles[id];
+    if (quantiteRestante <= 0) {
+        alert('Stock épuisé pour ce Pokémon.');
+        return;
+    }
+
+    // Mise à jour du stock local sans affecter l'API
+    quantitesDisponibles[id] -= 1;
+    quantiteElement.innerHTML = `<span style="font-size: 1.5em;">Quantité disponible : <span style="color: green;">${quantitesDisponibles[id]}</span></span>`;
+
+});
+
+// Gestion des éléments de la popup des avis
+const avisPopup = document.getElementById('avisPopup');
+const closeAvisPopup = document.querySelector('.close-avis');
+const avisContainer = document.getElementById('avisContainer');
+const formAddReview = document.getElementById('formAddReview');
+const addReviewForm = document.getElementById('addReviewForm');  // Formulaire pour ajouter un avis
+const viewReviewsButton = document.createElement('button');  // Ajouter le bouton "Voir les Avis"
+
+// Ajout dynamique du bouton "Voir les Avis"
+viewReviewsButton.textContent = "Voir les avis";
+viewReviewsButton.classList.add('btn', 'btn-info'); // Ajout de style
+document.querySelector('.popup-text-content').appendChild(viewReviewsButton);
+
+function afficherAvis(avis) {
+    avisContainer.innerHTML = ''; // Vider les avis précédents
+    if (avis.length === 0) {
+        avisContainer.innerHTML = '<p>Aucun avis n\'a été déposé sur ce produit.</p>';
+    } else {
+        avis.forEach(avis => {
+            const avisDiv = document.createElement('div');
+            avisDiv.classList.add('avis');
+            avisDiv.innerHTML = `
+                <strong>${avis.utilisateur}</strong> - Note : ${avis.note}/5<br>
+                <p>${avis.commentaire}</p>
+                <small>${new Date(avis.date_creation).toLocaleString()}</small>
+            `;
+
+            // Si l'utilisateur est admin, ajouter un bouton pour supprimer l'avis
+            <?php if (isset($_SESSION['user_statut']) && $_SESSION['user_statut'] === 'admin'): ?>
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Supprimer';
+                deleteButton.classList.add('btn', 'btn-danger', 'ml-2'); // Style bouton
+                deleteButton.addEventListener('click', function() {
+                    const token = localStorage.getItem('access_token'); // Récupérer le token JWT
+
+                    // Vérifier si le token est présent
+                    if (!token) {
+                        alert('Vous devez être authentifié pour supprimer cet avis.');
+                        return;
+                    }
+
+                    // Appel API pour supprimer l'avis
+                    fetch(`http://127.0.0.1:8000/api/avis/${avis.id}/supprimer-avis/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`, // Ajouter le token JWT dans les headers
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Avis supprimé');
+                            avisDiv.remove();
+                        } else {
+                            response.json().then(data => {
+                                alert('Erreur lors de la suppression de l\'avis : ' + data.error);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la suppression de l\'avis :', error);
+                        alert('Une erreur est survenue lors de la suppression.');
+                    });
+                });
+                avisDiv.appendChild(deleteButton);
+            <?php endif; ?>
+
+            avisContainer.appendChild(avisDiv);
+        });
+    }
+}
+
+// Ouverture de la popup des avis pour tous les utilisateurs (connectés ou non)
+viewReviewsButton.addEventListener('click', function() {
+    const pokemonId = popupId.textContent;
+
+    // Appeler l'API pour récupérer les avis du produit
+    fetch(`http://127.0.0.1:8000/api/produits/${pokemonId}/avis/`)
+        .then(response => response.json())
+        .then(avis => {
+            afficherAvis(avis);  // Afficher les avis
+            avisPopup.style.display = 'block';  // Afficher la popup des avis
         })
+        .catch(error => console.error('Erreur lors de la récupération des avis :', error));
+});
+
+// Fermer la popup des avis
+closeAvisPopup.addEventListener('click', function() {
+    avisPopup.style.display = 'none';
+});
+
+
+// Vérification de l'achat pour afficher le formulaire d'avis
+function verifierAchat(pokemonId) {
+    fetch(`verifier_achat.php?produit_id=${pokemonId}`)
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                alert('Erreur lors de l\'ajout au panier.');
+            if (data.achat || <?php echo ($_SESSION['user_statut'] === 'admin') ? 'true' : 'false'; ?>) {
+                addReviewForm.style.display = 'block';  // Afficher le formulaire pour ajouter un avis
             } else {
-                alert("Votre Pokémon a été ajouté au panier");
-
-                // Mettre à jour le compteur du panier en haut à droite
-                document.getElementById('panierCount').textContent = data.totalArticles;
+                addReviewForm.style.display = 'none';  // Masquer le formulaire si l'utilisateur ne peut pas ajouter d'avis
             }
         })
-        .catch(error => {
-            console.error('Erreur lors de l\'ajout au panier:', error);
-        });
+        .catch(error => console.error('Erreur lors de la vérification de l\'achat :', error));
+}
 
-        popup.style.display = 'none'; // Fermer la popup après l'ajout au panier
+// Ouverture de la popup des avis
+function openAvisPopup(pokemonId) {
+    // Appeler l'API pour récupérer les avis du produit
+    fetch(`http://127.0.0.1:8000/api/produits/${pokemonId}/avis/`)
+        .then(response => response.json())
+        .then(avis => {
+            afficherAvis(avis);  // Afficher les avis
+            verifierAchat(pokemonId);  // Vérifier si l'utilisateur peut ajouter un avis
+            avisPopup.style.display = 'block';  // Afficher la popup des avis
+        })
+        .catch(error => console.error('Erreur lors de la récupération des avis :', error));
+}
+
+// Gestion de l'ouverture de la popup des avis via le bouton "Voir les avis"
+viewReviewsButton.addEventListener('click', function() {
+    const pokemonId = popupId.textContent;
+    openAvisPopup(pokemonId);  // Appeler la fonction pour afficher les avis
+});
+
+// Soumission du formulaire d'ajout d'avis
+formAddReview.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const pokemonId = popupId.textContent;
+    const note = document.getElementById('note').value;
+    const commentaire = document.getElementById('commentaire').value;
+
+    // Récupérer le token JWT depuis la session ou un cookie
+    const token = localStorage.getItem('access_token');  // Adapte selon la méthode de stockage du token
+
+    // Appel API pour ajouter un avis
+    fetch(`http://127.0.0.1:8000/api/produits/${pokemonId}/ajouter-avis/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`  // Ajouter le token dans les headers
+        },
+        body: JSON.stringify({note: parseInt(note), commentaire: commentaire})
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('Avis ajouté avec succès');
+            // Recharger les avis
+            viewReviewsButton.click();
+        } else {
+            alert('Erreur lors de l\'ajout de l\'avis');
+        }
     });
+});
+
+// Fermeture de la popup des avis
+closeAvisPopup.addEventListener('click', function() {
+    avisPopup.style.display = 'none';
 });
 
 
 
+});
 </script>
+
 
 <!-- Script pour le filtrage par type -->
 <script>
 // Script pour le filtrage par type et légendaire
 document.addEventListener("DOMContentLoaded", function() {
     const typeFilter = document.getElementById('type-filter');
-    const legendaryFilter = document.getElementById('legendary-filter');  
+    const legendaryFilter = document.getElementById('legendary-filter');  // Ajout du filtre légendaire
     const cards = document.querySelectorAll('.card');
 
     function filterCards() {
@@ -344,12 +564,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Ajouter les écouteurs d'événements pour les filtres
     typeFilter.addEventListener('change', filterCards);
-    legendaryFilter.addEventListener('change', filterCards);  
+    legendaryFilter.addEventListener('change', filterCards);  // Ajout du listener pour le filtre légendaire
 });
 </script>
-</body>
-</html>
-
 
 <style>
 /* Styles CSS pour le catalogue */
@@ -399,9 +616,37 @@ document.addEventListener("DOMContentLoaded", function() {
   font-size: 1rem;
   color: #757575;
 }
+.popup-content .close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px; /* Taille plus grande */
+    cursor: pointer;
+    color: #ff0000; /* Couleur rouge pour attirer l'attention */
+    font-weight: bold;
+}
 
+.popup-content .close:hover {
+    color: #cc0000; /* Couleur légèrement plus foncée au survol */
+}
 .pokemon-type {
   display: block;
+}
+.button-avis {
+    background-color: #28a745; /* Couleur de fond vert */
+    color: white; /* Couleur du texte */
+    border: none; /* Supprimer les bordures */
+    padding: 10px 20px; /* Ajouter un peu de padding */
+    font-size: 16px; /* Ajuster la taille du texte */
+    border-radius: 5px; /* Ajouter des bordures arrondies */
+    cursor: pointer; /* Changer le curseur en pointeur */
+    transition: background-color 0.3s ease; /* Ajouter une transition pour le changement de couleur */
+    margin-top: 10px; /* Ajouter un peu d'espace au-dessus du bouton */
+}
+
+.button-avis:hover {
+    background-color: #218838; /* Changer la couleur de fond au survol */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ajouter un léger effet d'ombre au survol */
 }
 
 .search-wrap {
@@ -424,7 +669,92 @@ document.addEventListener("DOMContentLoaded", function() {
     border-radius: 5px;
     font-size: 16px;
 }
+/* Style de la popup des avis */
+.popup-content-avis {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    margin: auto;
+    position: relative;
+}
 
+/* Style pour la croix de fermeture */
+.popup-content-avis .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 25px;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.popup-content-avis .close:hover {
+    color: #ff0000;
+}
+
+/* Style des avis */
+.avis-container {
+    margin-top: 20px;
+}
+
+.avis {
+    border-bottom: 1px solid #ddd;
+    padding: 15px 0;
+}
+
+.avis:last-child {
+    border-bottom: none;
+}
+
+.avis strong {
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+.avis p {
+    margin: 10px 0;
+    color: #555;
+}
+
+.avis .note {
+    font-weight: bold;
+    color: #f39c12;
+}
+
+/* Style de la date */
+.avis-date {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 10px;
+}
+
+/* Style pour le bouton "Écrire un avis" */
+.button-ecrire-avis {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.button-ecrire-avis:hover {
+    background-color: #0056b3;
+}
+
+/* Style pour la section "Aucun avis" */
+.no-avis {
+    font-size: 1.2em;
+    color: #555;
+    text-align: center;
+    padding: 20px 0;
+}
 .search-btn {
     background-color: #007bff;
     color: white;
@@ -541,5 +871,33 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 }
 </style>
+<!-- Popup pour les avis -->
+<div id="avisPopup" class="popup" style="display: none;">
+    <div class="popup-content">
+        <span class="close-avis">&times;</span>
+        <div id="avisContainer">
+            <!-- Les avis seront chargés ici dynamiquement -->
+        </div>
+        <!-- Formulaire pour ajouter un avis (sera affiché si l'utilisateur peut ajouter un avis) -->
+        <div id="addReviewForm" style="display: none;">
+            <h3>Ajouter un avis</h3>
+            <form id="formAddReview">
+                <label for="note">Note :</label>
+                <select id="note" name="note" required>
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Très bon</option>
+                    <option value="3">3 - Moyen</option>
+                    <option value="2">2 - Médiocre</option>
+                    <option value="1">1 - Mauvais</option>
+                </select>
+                <br>
+                <label for="commentaire">Commentaire :</label>
+                <textarea id="commentaire" name="commentaire" required></textarea>
+                <br>
+                <button type="submit">Envoyer</button>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
 </html>
