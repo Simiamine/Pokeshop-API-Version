@@ -398,7 +398,7 @@ class CommandePaiementView(APIView):
                 }],
                 mode='payment',
                 success_url='http://localhost:8083/Pokeshop-API-Version/php/ecran_de_validation.php',
-                cancel_url='https://example.com/cancel',
+                cancel_url='http://localhost:8083/Pokeshop-API-Version/php/commande_cancel.php',
             )
 
             Paiement.objects.create(

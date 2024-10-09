@@ -26,7 +26,7 @@ $_SESSION['finalPrice'] = 0;
 }
 
 body {
-    background-image: url('../img/desktop-wallpaper-ultra-water-pokemon-and-background-pokemon-underwater.jpg');
+    background-image: url('../img/lugiawallpaper.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
