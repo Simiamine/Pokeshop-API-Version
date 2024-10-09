@@ -63,8 +63,10 @@
     <?php
         // Vérification si le formulaire de modification a été soumis
         if (isset($_POST['modifier'])) {
+            // Récupération de l'ID du champ caché
+            $currentId = $_POST['id'];
+        
             // Récupération des nouvelles valeurs du formulaire
-            // L'ID ne peut pas être modifié
             $nom = htmlentities($_POST['nom'], ENT_QUOTES, 'UTF-8');
             $type_1 = htmlentities($_POST['type_1'], ENT_QUOTES, 'UTF-8');
             $type_2 = htmlentities($_POST['type_2'], ENT_QUOTES, 'UTF-8');
@@ -74,16 +76,17 @@
             $description = htmlentities($_POST['description'], ENT_QUOTES, 'UTF-8');
             $quantite = $_POST['quantité'];
             $imageFilePath = $pokedex->image;
-
+        
             // Gestion de l'image si une nouvelle image a été téléchargée
             if (!empty($_FILES['image']['name'])) {
                 $image = $_FILES['image']['name'];
                 $imageFilePath = '../../img/' . uniqid() . $image;
                 move_uploaded_file($_FILES['image']['tmp_name'], $imageFilePath);
             }
-
-            // Préparation des données à envoyer via PUT
+        
+            // Inclure uniquement les champs à modifier
             $data = [
+                'id' => $currentId, // Ajout de l'ID dans le payload
                 'nom' => $nom,
                 'type_1' => $type_1,
                 'type_2' => $type_2,
@@ -91,25 +94,25 @@
                 'prix' => $prix,
                 'discount' => $discount,
                 'description' => $description,
-                'quantité' => $quantite,
+                'quantite' => $quantite,
                 'image' => $imageFilePath
             ];
-
-            // Initialisation de cURL pour la requête PUT
-            $putUrl = 'http://127.0.0.1:8000/api/pokedex/' . $currentId . '/';
-            $ch = curl_init($putUrl);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        
+            // Initialisation de cURL pour la requête PATCH
+            $patchUrl = 'http://127.0.0.1:8000/api/pokedex/' . $currentId . '/';
+            $ch = curl_init($patchUrl);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PATCH");  // Utilisation de PATCH ici
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
             ]);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));  // Envoi des champs modifiés
+        
             // Exécution de la requête
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-
+        
             // Gestion de la réponse
             if ($httpCode == 200) {
                 header('Location: ajout_pok.php');
@@ -121,42 +124,45 @@
     ?>
 
     <!-- Formulaire de modification -->
-    <form method="post" enctype="multipart/form-data">
-        <label class="form-label">ID :</label>
-        <input type="text" class="form-control" name="id" value="<?= $pokedex->id ?>" disabled>
+<form method="post" enctype="multipart/form-data">
+    <!-- Champ ID caché -->
+    <input type="hidden" name="id" value="<?= $pokedex->id ?>">
 
-        <label class="form-label">Nom :</label>
-        <input type="text" class="form-control" name="nom" value="<?= $pokedex->nom ?>" required>
+    <label class="form-label">ID :</label>
+    <input type="text" class="form-control" value="<?= $pokedex->id ?>" disabled>
 
-        <label class="form-label">Type 1 :</label>
-        <input type="text" class="form-control" name="type_1" value="<?= $pokedex->type_1 ?>" required>
+    <label class="form-label">Nom :</label>
+    <input type="text" class="form-control" name="nom" value="<?= $pokedex->nom ?>" required>
 
-        <label class="form-label">Type 2 :</label>
-        <input type="text" class="form-control" name="type_2" value="<?= $pokedex->type_2 ?>">
+    <label class="form-label">Type 1 :</label>
+    <input type="text" class="form-control" name="type_1" value="<?= $pokedex->type_1 ?>" required>
 
-        <label class="form-label">Génération :</label>
-        <input type="number" class="form-control" step="1" name="generation" min="1" value="<?= $pokedex->generation ?>" required>
+    <label class="form-label">Type 2 :</label>
+    <input type="text" class="form-control" name="type_2" value="<?= $pokedex->type_2 ?>">
 
-        <label class="form-label">Prix :</label>
-        <input type="number" class="form-control" step="0.1" name="prix" min="0" value="<?= $pokedex->prix ?>" required>
+    <label class="form-label">Génération :</label>
+    <input type="number" class="form-control" step="1" name="generation" min="1" value="<?= $pokedex->generation ?>" required>
 
-        <label class="form-label">Discount :</label>
-        <input type="range" value="<?= $pokedex->discount ?>" class="form-control" name="discount" min="0" max="90">
+    <label class="form-label">Prix :</label>
+    <input type="number" class="form-control" step="0.1" name="prix" min="0" value="<?= $pokedex->prix ?>" required>
 
-        <label class="form-label">Description (maximum 255 caractères) :</label>
-        <textarea class="form-control" name="description"><?= $pokedex->description ?></textarea>
+    <label class="form-label">Discount :</label>
+    <input type="range" value="<?= $pokedex->discount ?>" class="form-control" name="discount" min="0" max="90">
 
-        <label class="form-label">Quantité :</label>
-        <input type="number" class="form-control" name="quantité" min="0" value="<?= $pokedex->quantite ?>" required>
+    <label class="form-label">Description (maximum 255 caractères) :</label>
+    <textarea class="form-control" name="description"><?= $pokedex->description ?></textarea>
 
-        <label class="form-label">Image :</label>
-        <input type="file" accept="image/png, image/jpeg, image/jpg" class="form-control" name="image">
+    <label class="form-label">Quantité :</label>
+    <input type="number" class="form-control" name="quantité" min="0" value="<?= $pokedex->quantite ?>" required>
 
-        <!-- Affichage de l'image actuelle -->
-        <?php if (!empty($pokedex->image)) : ?>
-            <img width="250" class="img img-fluid" src="../../img/<?= $pokedex->image ?>"><br>
-        <?php endif; ?>
+    <label class="form-label">Image :</label>
+    <input type="file" accept="image/png, image/jpeg, image/jpg" class="form-control" name="image">
 
-        <input type="submit" value="Modifier produit" class="btn btn-primary my-2" name="modifier">
-    </form>
+    <!-- Affichage de l'image actuelle -->
+    <?php if (!empty($pokedex->image)) : ?>
+        <img width="250" class="img img-fluid" src="../../img/<?= $pokedex->image ?>"><br>
+    <?php endif; ?>
+
+    <input type="submit" value="Modifier produit" class="btn btn-primary my-2" name="modifier">
+</form>
 </main>
