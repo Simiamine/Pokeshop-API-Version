@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from django.urls import path, include
-from .views import UtilisateurViewSet, CommandeViewSet, PokedexViewSet, UserRegisterView, AvisViewSet, UserUpdateDeleteView, PaiementView, StatutPaiementView, stripe_webhook, LoginView, RecommendationView, GlobalRecommendationView
+from .views import UtilisateurViewSet, CommandeViewSet, PokedexViewSet, UserRegisterView, AvisViewSet, UserUpdateDeleteView, PaiementView, StatutPaiementView, stripe_webhook, LoginView, RecommendationView, GlobalRecommendationView, CommandePaiementView
 
 router = DefaultRouter()
 router.register(r'utilisateurs', UtilisateurViewSet)
@@ -30,5 +30,6 @@ urlpatterns += [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('recommandations/', GlobalRecommendationView.as_view(), name='global-recommandations'),
     path('utilisateurs/<int:pk>/recommandations/', RecommendationView.as_view(), name='utilisateur-recommandations'),
+    path('commande-paiement/', CommandePaiementView.as_view(), name='commande-paiement'),
 
 ]

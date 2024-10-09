@@ -8,13 +8,8 @@ function convertirEuroEnNombre($montant) {
     return $montantNettoye;
 }
 
-// Générer un numéro de commande unique
-function genererNumeroCommande() {
-    return 'CMD' . strtoupper(uniqid());
-}
-
 // Calcul du total du panier
-if (isset($_SESSION['panier']) && !empty($_SESSION['panier'])){
+if (isset($_SESSION['panier']) && !empty($_SESSION['panier'])) {
     foreach ($_SESSION['panier'] as $key => $produit) {
         $result = convertirEuroEnNombre($produit->prixApresRemise) * $produit->quantite;
         $_SESSION['finalPrice'] += $result;
@@ -25,19 +20,23 @@ if (isset($_SESSION['panier']) && !empty($_SESSION['panier'])){
 if (!isset($_SESSION['panier'])) {
     $_SESSION['panier'] = array();
 }
-$total = 0;
 
 // Vérification des informations de formulaire et envoi de la commande à l'API
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Vérifier si l'utilisateur est connecté et possède un token JWT
+    if (!isset($_SESSION['access_token'])) {
+        echo "Erreur : Utilisateur non authentifié.";
+        exit();
+    }
+
+    $access_token = $_SESSION['access_token'];
+
     // Récupérer les informations du formulaire
     $adresse = $_POST['adresse'];
     $ville = $_POST['ville'];
     $code_postal = $_POST['code_postal'];
     $livraison = $_POST['livraison'];
     $payment_method = $_POST['payment_method'];
-
-    // Générer un numéro de commande
-    $numero_commande = genererNumeroCommande();
 
     // Préparer les détails de la commande (produits et quantités)
     $detailsCommande = [];
@@ -58,68 +57,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Préparer les données pour la commande
+    // Préparer les données pour la commande et le paiement combinés
     $commandeData = [
-        'utilisateur' => $_SESSION['user_id'], // ID de l'utilisateur connecté
-        'adresse_livraison' => $adresse,
-        'ville' => $ville,
-        'code_postal' => $code_postal,
-        'livraison' => $livraison,
-        'total' => $_SESSION['finalPrice'],
-        'numero_commande' => $numero_commande, // Ajouter le numéro de commande
-        'details' => $detailsCommande
+        'commande' => [
+            'adresse_livraison' => $adresse,
+            'ville' => $ville,
+            'code_postal' => $code_postal,
+            'details' => $detailsCommande
+        ],
+        'montant' => $_SESSION['finalPrice']
     ];
 
-    // URL de l'API pour créer la commande
-    $url = 'http://127.0.0.1:8000/api/commandes/';
+    // URL de l'API pour créer la commande et traiter le paiement
+    $url = 'http://127.0.0.1:8000/api/commande-paiement/';
 
     // Envoyer les données à l'API
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $access_token
+    ]);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($commandeData));
 
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    // Si la commande est créée avec succès
+    // Si la commande et le paiement sont traités avec succès
     if ($http_code == 201) {
         $commandeResponse = json_decode($response, true);
-        $commande_id = $commandeResponse['id'];
-
-        // Préparer les données de paiement
-        $paiementData = [
-            'commande' => $commande_id,
-            'montant' => $_SESSION['finalPrice'],
-        ];
-
-        // URL de l'API Stripe pour traiter le paiement
-        $stripe_url = 'http://127.0.0.1:8000/api/paiements/traiter/';
-
-        $ch = curl_init($stripe_url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($paiementData));
-
-        $stripe_response = curl_exec($ch);
-        $stripe_http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        // Si le paiement est validé
-        if ($stripe_http_code == 201) {
-            // Redirection vers la page de validation de paiement (Stripe)
-            header('Location: ecran_de_validation.php');
+        
+        // Redirection vers la page de validation de paiement
+        if (isset($commandeResponse['stripe_url'])) {
+            header('Location: ' . $commandeResponse['stripe_url']);
             exit();
         } else {
-            echo "Erreur lors du traitement du paiement.";
-            echo "HTTP Code: $stripe_http_code";
-            echo "Réponse de l'API Stripe: $stripe_response";
+            echo "Erreur : L'URL de validation de paiement est manquante.";
         }
     } else {
-        echo "Erreur lors de la création de la commande.";
+        echo "Erreur lors de la création de la commande et du paiement.";
         echo "HTTP Code: $http_code";
         echo "Réponse de l'API: $response";
     }
