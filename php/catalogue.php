@@ -341,7 +341,7 @@ cards.forEach(card => {
         const price = priceElement ? priceElement.textContent : 'N/A';
         const discountedPrice = (parseFloat(priceElement.textContent) * 0.8).toFixed(2) + '€';
 
-        
+            
 
         // Ouvrir la popup même si l'utilisateur n'est pas connecté
         openPopup(id, name, image, description, quantite, price, discountedPrice);
