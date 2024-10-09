@@ -38,7 +38,7 @@ $path = "/".basename(dirname(dirname(__FILE__)));  // Permet d'obtenir le nom du
             <li><a href="<?php echo $path."/php/admin/analyse.php";?>" id="ajtPokemon" class="ligne-header">Analyse</a></li>
             <li><a href="<?php echo $path."/php/admin/ajout_pok.php";?>" id="pokemon" class="ligne-header">Pokemons</a></li>
             <li><a href="<?php echo $path."/php/admin/afficher_utilisateur.php";?>" id="utilisateur" class="ligne-header">Utilisateurs</a></li>
-            <li><a href="<?php echo $path."/php/admin/afficher_commande.php";?>" id="commande" class="ligne-header">Commandes</a></li>
+            <li><a href="<?php echo $path."/php/admin/afficher_commande.php";?>" id="commandes" class="ligne-header">Commandes</a></li>
             <li><a href="<?php echo $path."/php/deconnexion.php";?>" id="deconnexion">Déconnexion</a></li>
             <li>
                 <a id="panier" class="ligne-header" href="<?php echo $path."/php/panier.php";?>">

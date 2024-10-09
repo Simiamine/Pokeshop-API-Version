@@ -1,5 +1,7 @@
-<?php 
+<?php
+
     session_start();
+
     if (!isset($_SESSION['user_statut']) || $_SESSION['user_statut'] != "admin") {
         header('Location: ../../index.php');
         exit;
@@ -7,7 +9,7 @@
 
     // Récupération de l'ID du Pokémon depuis l'URL
     $currentId = $_GET['id'];
-    
+
     // Récupération des informations du Pokémon via l'API
     $url = 'http://127.0.0.1:8000/api/pokedex/' . $currentId . '/';
     $ch = curl_init($url);
@@ -33,7 +35,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier un produit</title>
     <script src="../js/pokemon.js" defer></script>
-    <script src="https://kit.fontawesome.com/d6a49ddf6e.js" crossorigin="anonymous"></script>
+    <script src=https://kit.fontawesome.com/d6a49ddf6e.js crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/pokedex.css">
     <link rel="stylesheet" href="../../css/bootstrap.css">
@@ -62,7 +64,7 @@
         // Vérification si le formulaire de modification a été soumis
         if (isset($_POST['modifier'])) {
             // Récupération des nouvelles valeurs du formulaire
-            $id = $_POST['id']; // Nouvel ID
+            // L'ID ne peut pas être modifié
             $nom = htmlentities($_POST['nom'], ENT_QUOTES, 'UTF-8');
             $type_1 = htmlentities($_POST['type_1'], ENT_QUOTES, 'UTF-8');
             $type_2 = htmlentities($_POST['type_2'], ENT_QUOTES, 'UTF-8');
@@ -82,7 +84,6 @@
 
             // Préparation des données à envoyer via PUT
             $data = [
-                'id' => $id,
                 'nom' => $nom,
                 'type_1' => $type_1,
                 'type_2' => $type_2,
@@ -122,7 +123,7 @@
     <!-- Formulaire de modification -->
     <form method="post" enctype="multipart/form-data">
         <label class="form-label">ID :</label>
-        <input type="text" class="form-control" name="id" value="<?= $pokedex->id ?>" required>
+        <input type="text" class="form-control" name="id" value="<?= $pokedex->id ?>" disabled>
 
         <label class="form-label">Nom :</label>
         <input type="text" class="form-control" name="nom" value="<?= $pokedex->nom ?>" required>
