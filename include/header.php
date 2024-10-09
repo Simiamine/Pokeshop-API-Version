@@ -52,7 +52,7 @@ $path = "/".basename(dirname(dirname(__FILE__)));  // Permet d'obtenir le nom du
             <?php } else { ?>
             <li><a href="<?php echo $path."/index.php";?>" id="menu" class="ligne-header">Menu</a></li>
             <li><a href="<?php echo $path."/php/catalogue.php";?>" id="catalogue" class="ligne-header">Catalogue</a></li>
-            <li><a href="<?php echo $path."/php/avantage.php";?>" id="avantage" class="ligne-header">Avantages</a></li>
+
             <li><a href="<?php echo $path."/php/contact.php";?>" id="contact" class="ligne-header">Contact</a></li>
             <li><a href="<?php echo $path."/php/login.php";?>" id="connexion" class="ligne-header">Connexion</a></li>
             <li>
