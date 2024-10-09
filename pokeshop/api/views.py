@@ -1,4 +1,4 @@
-import stripe
+import stripe, requests
 from django.contrib.auth import authenticate
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
@@ -323,13 +323,11 @@ class CommandePaiementView(APIView):
         commande_data = request.data.get('commande')
         montant = request.data.get('montant')
 
-        # Vérifier que le body est complet
         if not commande_data:
             return Response({'error': 'Les informations de la commande sont requises.'}, status=status.HTTP_400_BAD_REQUEST)
         if not montant or montant <= 0:
             return Response({'error': 'Le montant doit être supérieur à zéro.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Vérifier les champs de la commande
         adresse_livraison = commande_data.get('adresse_livraison')
         ville = commande_data.get('ville')
         code_postal = commande_data.get('code_postal')
@@ -338,11 +336,6 @@ class CommandePaiementView(APIView):
         if not all([adresse_livraison, ville, code_postal, details]):
             return Response({'error': 'Tous les champs de la commande sont requis (adresse_livraison, ville, code_postal, details).'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Vérifier que les détails sont valides
-        if not isinstance(details, list) or len(details) == 0:
-            return Response({'error': 'Les détails de la commande doivent être une liste non vide.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Calculer le montant total
         total_commande = 0
         for item in details:
             produit_id = item.get('produit')
@@ -358,29 +351,38 @@ class CommandePaiementView(APIView):
 
             total_commande += produit.prix * quantite
 
-        # Créer la commande avec le montant total
         try:
             commande = Commande.objects.create(
                 utilisateur=utilisateur,
                 adresse_livraison=adresse_livraison,
                 ville=ville,
                 code_postal=code_postal,
-                livraison="Standard",  # Vous pouvez changer ou récupérer ce champ en fonction de votre besoin
+                livraison="Standard",
                 total=total_commande,
-                numero_commande=f"CMD-{timezone.now().strftime('%Y%m%d%H%M%S')}",  # Générer un numéro de commande unique
+                numero_commande=f"CMD-{timezone.now().strftime('%Y%m%d%H%M%S')}",
                 statut='EN_TRAITEMENT'
             )
 
-            # Ajouter les produits à la commande
             for item in details:
                 produit = Pokedex.objects.get(id=item['produit'])
                 quantite = item['quantite']
                 CommandeProduit.objects.create(commande=commande, produit=produit, quantite=quantite)
 
+                # Appeler l'API pour mettre à jour le stock de chaque produit
+                url = f"http://127.0.0.1:8000/api/pokedex/{produit.id}/update-stock/"
+                headers = {
+                    'Authorization': f'Bearer {request.auth}',
+                    'Content-Type': 'application/json'
+                }
+                data = {'quantite': quantite}
+                response = requests.post(url, headers=headers, json=data)
+
+                if response.status_code != 200:
+                    return Response({'error': f"Erreur lors de la mise à jour du stock pour le produit {produit.nom}"}, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Créer une session de paiement Stripe
         try:
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
@@ -390,7 +392,7 @@ class CommandePaiementView(APIView):
                         'product_data': {
                             'name': f"Commande {commande.numero_commande}",
                         },
-                        'unit_amount': int(float(total_commande) * 100),  # Stripe attend le montant en centimes
+                        'unit_amount': int(float(total_commande) * 100),
                     },
                     'quantity': 1,
                 }],
@@ -399,7 +401,6 @@ class CommandePaiementView(APIView):
                 cancel_url='https://example.com/cancel',
             )
 
-            # Créer un paiement en base de données
             Paiement.objects.create(
                 transaction_id=session.id,
                 commande=commande,
@@ -414,7 +415,6 @@ class CommandePaiementView(APIView):
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            # Supprimer la commande si le paiement échoue
             commande.delete()
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
