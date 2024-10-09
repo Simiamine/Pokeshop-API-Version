@@ -71,7 +71,8 @@ function mailContact(string $nom, string $adrMail, string $msg){
 
         $mail->setFrom('pokeshop.nepasrepondre@gmail.com', "Pokeshop - Contact");
 
-        $mail->addAddress("mzaliamine@gmail.com");  // MAIL A MODIFIER SELON LE RECEVEUR !!!
+        $mail->addAddress("mzaliamine@gmail.com");
+        $mail->addAddress("bouaisamy@gmail.com");     // MAIL A MODIFIER SELON LE RECEVEUR !!!
 
         $mail->isHTML(true);
 

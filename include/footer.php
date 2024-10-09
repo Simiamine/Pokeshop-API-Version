@@ -9,7 +9,6 @@ $path = "/".basename(dirname(dirname(__FILE__)));  // Permet d'obtenir le nom du
       <ul>
         <li><a href="<?php echo $path."/index.php";?>">Menu</a></li>
         <li><a href="<?php echo $path."/php/catalogue.php";?>">Catalogue</a></li>
-        <li><a href="<?php echo $path."/php/avantage.php";?>">Avantages</a></li>
         <li><a href="<?php echo $path."/php/contact.php";?>">Nous Contacter</a></li>
       </ul>
     </div>
